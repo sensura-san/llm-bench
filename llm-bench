@@ -1,0 +1,221 @@
+#!/usr/bin/env bash
+# Robust Pi4 LLM bench (storage-friendly) — CSV append with run index
+# - Auto-detects available quants per model dir
+# - MODEL_FILTER / QUANT_FILTER (space-separated)
+# - Case-insensitive quant match (e.g., Q2_K vs q2_k) and .hfpath stub lookup
+# - Runs 3 tests per quant: -p, -n, -pg ; parses real llama-bench JSON fields
+# - Adds datetime + run id; appends to CSV; auto-increments run across invocations
+# - Default llama-bench path: ./llama.cpp/build/bin/llama-bench
+
+set -u
+IFS=$'\n\t'
+
+# ---- config (env-overridable) ----
+LLAMA=${LLAMA:-./llama.cpp/build/bin/llama-bench}
+THREADS=${THREADS:-4}
+PROMPT=${PROMPT:-256}
+GEN=${GEN:-128}
+REPS=${REPS:-3}
+OUT=${OUT:-results_pi4.csv}
+LOG=${LOG:-bench_errors.log}
+TIMEOUT_SECS=${TIMEOUT_SECS:-600}
+DATE_FMT=${DATE_FMT:-'+%Y-%m-%d %H:%M:%S'}
+DELETE_AFTER=${DELETE_AFTER:-0}
+MODEL_FILTER=${MODEL_FILTER:-}
+QUANT_FILTER=${QUANT_FILTER:-}
+RUN_ID=${RUN_ID:-}
+
+# ---- model set ----
+declare -A MODELS=(
+  ["models/tinyllama"]="Q2_K Q3_K_M Q4_K_M Q5_K_M"
+  ["models/llama3_1b"]="Q2_K Q3_K_M Q4_K_M Q5_K_M"
+  ["models/qwen05b"]="Q2_K Q3_K_M Q4_K_M Q5_K_M"
+  ["models/gemma2_2b"]="IQ2_M Q3_K_M Q4_K_M"
+  ["models/phi3mini"]="IQ2_M IQ3_M Q3_K_M"
+)
+
+# ---- helpers ----
+err() { printf "%s\n" "$*" >&2; }
+
+split_on_spaces() {
+  local s="$1"; local -n out_ref="$2"
+  local OLDIFS="$IFS"; IFS=' '
+  # shellcheck disable=SC2206
+  out_ref=($s)
+  IFS="$OLDIFS"
+}
+
+# case-insensitive .gguf / .hfpath pick (smallest file if multiple)
+pick_file() {
+  local dir="$1" quant="$2"
+  local -a matches=()
+  shopt -s nullglob nocaseglob
+  matches=("$dir"/*"$quant"*.gguf)
+  shopt -u nocaseglob
+  shopt -u nullglob
+
+  if (( ${#matches[@]} == 0 )); then
+    local hf_ci
+    hf_ci=$(find "$dir" -maxdepth 1 -type f -iname "${quant}.hfpath" -print -quit 2>/dev/null || true)
+    [[ -n "$hf_ci" ]] && { cat "$hf_ci"; return 0; }
+    return 1
+  fi
+
+  local best="${matches[0]}" best_size
+  best_size=$(stat -c%s "$best" 2>/dev/null || echo 0)
+  local f s
+  for f in "${matches[@]}"; do
+    s=$(stat -c%s "$f" 2>/dev/null || echo 0)
+    (( s < best_size )) && { best="$f"; best_size="$s"; }
+  done
+  printf "%s\n" "$best"
+}
+
+want_model() {
+  local name="$1"
+  [[ -z "$MODEL_FILTER" ]] && return 0
+  local -a ms; split_on_spaces "$MODEL_FILTER" ms
+  local m; for m in "${ms[@]}"; do [[ "$m" == "$name" ]] && return 0; done
+  return 1
+}
+want_quant() {
+  local quant="$1"
+  [[ -z "$QUANT_FILTER" ]] && return 0
+  local -a qs; split_on_spaces "$QUANT_FILTER" qs
+  local q; for q in "${qs[@]}"; do [[ "$quant" == "$q" ]] && return 0; done
+  return 1
+}
+
+delete_hf_cached() {
+  local model_path="$1"
+  [[ "$DELETE_AFTER" != "1" ]] && return 0
+  [[ "$model_path" != hf://* ]] && return 0
+  local cache_root="${XDG_CACHE_HOME:-$HOME/.cache}/llama.cpp"
+  local base="${model_path##*/}"
+  find "$cache_root" -type f -name "$base" -delete 2>/dev/null || true
+}
+
+detect_quants() {
+  local dir="$1"
+  local -a quants=(); declare -A seen=()
+  shopt -s nullglob
+  local f base q
+  for f in "$dir"/*.gguf; do
+    base=$(basename "$f"); q="${base##*.}"; q="${q%.gguf}"
+    [[ -n "$q" && -z "${seen[$q]:-}" ]] && { seen["$q"]=1; quants+=("$q"); }
+  done
+  for f in "$dir"/*.hfpath; do
+    q="$(basename "$f")"; q="${q%.hfpath}"
+    [[ -n "$q" && -z "${seen[$q]:-}" ]] && { seen["$q"]=1; quants+=("$q"); }
+  done
+  shopt -u nullglob
+  printf "%s\n" "${quants[@]}"
+}
+
+write_header() {
+  local want_hdr="model,quant,threads,test,n_prompt,n_gen,avg_ms,tok_s,source,datetime,run"
+  if [[ -s "$OUT" ]]; then
+    local hdr; hdr="$(head -n1 "$OUT" | tr -d '\r')"
+    if [[ "$hdr" == "$want_hdr" ]]; then return; fi
+    # header mismatch: rotate old file and start fresh to avoid mixed schemas
+    mv "$OUT" "${OUT}.bak.$(date +%Y%m%d%H%M%S)" 2>/dev/null || true
+  fi
+  echo "$want_hdr" > "$OUT"
+}
+
+append_row() { printf "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" "$@" >> "$OUT"; }
+
+init_run_id() {
+  if [[ -n "$RUN_ID" ]]; then return 0; fi
+  if [[ -s "$OUT" ]]; then
+    local last_run
+    last_run=$(tail -n +2 "$OUT" | awk -F, '{print $NF}' | grep -E '^[0-9]+$' | sort -n | tail -1)
+    RUN_ID=$(( ${last_run:-0} + 1 ))
+    return 0
+  fi
+  RUN_ID=1
+}
+
+# ---- preflight ----
+: > "$LOG" || { err "Cannot write $LOG"; exit 1; }
+if [[ ! -x "$LLAMA" ]]; then
+  err "ERROR: llama-bench not found or not executable at: $LLAMA"
+  exit 1
+fi
+command -v jq >/dev/null 2>&1 || { err "ERROR: 'jq' not found. sudo apt-get install -y jq"; exit 1; }
+command -v timeout >/dev/null 2>&1 || { err "ERROR: 'timeout' not found. sudo apt-get install -y coreutils"; exit 1; }
+
+# ---- run ----
+write_header
+init_run_id
+NOW="$(date "$DATE_FMT")"
+
+for DIR in "${!MODELS[@]}"; do
+  model_name="$(basename "$DIR")"
+  want_model "$model_name" || { err "skip: $model_name (filtered)"; continue; }
+  [[ -d "$DIR" ]] || { err "WARN: missing dir '$DIR' — skipping $model_name" | tee -a "$LOG" >/dev/null; continue; }
+
+  declare -a iter_quants=()
+  if [[ -n "$QUANT_FILTER" ]]; then
+    split_on_spaces "$QUANT_FILTER" iter_quants
+  else
+    readarray -t iter_quants <<<"$(detect_quants "$DIR")"
+  fi
+  (( ${#iter_quants[@]} == 0 )) && readarray -t iter_quants <<<"$(printf "%s\n" ${MODELS[$DIR]})"
+  (( ${#iter_quants[@]} == 0 )) && { err "WARN: no quants available for $model_name — skipping" | tee -a "$LOG" >/dev/null; continue; }
+
+  for Q in "${iter_quants[@]}"; do
+    want_quant "$Q" || { err "skip: $model_name / $Q (quant filtered)"; continue; }
+    FILE="$(pick_file "$DIR" "$Q" || true)"
+    if [[ -z "$FILE" ]]; then
+      err "skip: $model_name ($Q not found)" | tee -a "$LOG" >/dev/null
+      continue
+    fi
+    SRC="file"; [[ "$FILE" == hf://* ]] && SRC="hf"
+
+    # run 3 tests: p, n, pg
+    for test in p n pg; do
+      case "$test" in
+        p)  args=(-p "$PROMPT") ;;
+        n)  args=(-n "$GEN") ;;
+        pg) args=(-pg "$PROMPT,$GEN") ;;
+      esac
+
+      echo "==> $model_name / $Q [$SRC] test=$test (run=$RUN_ID)"
+      BENCH_JSON="$(timeout "$TIMEOUT_SECS" "$LLAMA" -m "$FILE" -t "$THREADS" -r "$REPS" -o json "${args[@]}" 2>>"$LOG" || true)"
+      if [[ -z "$BENCH_JSON" ]]; then
+        err "ERROR: no JSON for $model_name / $Q / $test" | tee -a "$LOG" >/dev/null
+        append_row "$model_name" "$Q" "$THREADS" "$test" "NA" "NA" "NA" "NA" "$SRC" "$NOW" "$RUN_ID"
+        continue
+      fi
+      # Log raw JSON for this test to help debugging
+      echo "RAW_JSON [$model_name/$Q/$test]: $BENCH_JSON" >> "$LOG"
+
+      # Parse tolerant of slight key name variations:
+      CSV_LINE="$(echo "$BENCH_JSON" | jq -r --arg m "$model_name" --arg q "$Q" --arg th "$THREADS" --arg te "$test" --arg src "$SRC" --arg dt "$NOW" --arg run "$RUN_ID" '
+        . as $r |
+        $r.n_prompt as $nprompt |
+        $r.n_gen    as $ngen |
+        $r.avg_ns   as $avg_ns |
+        $r.avg_ts   as $avg_ts |
+        # fallbacks
+        ($nprompt // $r.n_p // 0) as $np |
+        ($ngen    // $r.n        // 0) as $ng |
+        ($avg_ns  // 0)          as $ans |
+        ($avg_ts  // "NA")       as $ats |
+        [$m,$q,$th,$te, ($np|tostring), ($ng|tostring),
+         ( ($ans|tonumber) / 1000000.0 | tostring ),
+         ($ats|tostring), $src, $dt, $run] | @csv' 2>>"$LOG" || true)"
+
+      if [[ -z "$CSV_LINE" ]]; then
+        append_row "$model_name" "$Q" "$THREADS" "$test" "NA" "NA" "NA" "NA" "$SRC" "$NOW" "$RUN_ID"
+      else
+        echo "$CSV_LINE" >> "$OUT"
+      fi
+    done
+
+    delete_hf_cached "$FILE"
+  done
+done
+
+echo "Done. Results -> $OUT ; errors -> $LOG ; run=$RUN_ID"
