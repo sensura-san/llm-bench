@@ -54,6 +54,16 @@ Note: uses base rather than instruct models where possible, though shouldn't aff
 
 ## Quantisation
 - [GGUF-my-repo](https://huggingface.co/spaces/ggml-org/gguf-my-repo): converts public repo to a quantised GGUF version on a HuggingFace Space
+
+# Test a model
+```bash
+./llama-cli -m models/qwen3-06b/qwen3-752M-06b-Q4_K_M.gguf \
+  -sys "You are a helpful assistant"
+```
+```bash
+./llama-bench -m models/qwen3-06b/qwen3-752M-06b-Q4_K_M.gguf \
+  -p 128 -n 64 -t 4 -r 1 -o json | jq .
+```
 # TODO:
 - completely rework llm-bench shell script
 - benchmark models from ./models/*, save each run to a csv
