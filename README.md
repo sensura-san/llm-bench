@@ -8,8 +8,9 @@ sudo apt install -y git build-essential cmake pkg-config libopenblas-dev jq libc
 
 ## Setup Conda environment
 ```bash
-curl -fsSL https://github.com/conda-forge/miniforge/releases/download/25.3.1-0/Miniforge3-Linux-aarch64.sh -o Miniforge3-Linux-aarch64.sh
-sudo bash ./Miniforge3-Linux-aarch64.sh
+curl -fsSLo ~/miniforge.sh https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-aarch64.sh
+bash ~/miniforge.sh -b -p "$HOME/miniforge3"
+rm ~/miniforge.sh
 ```
 ```bash
 conda create -n llmbench python=3.11 -y
