@@ -32,13 +32,13 @@ cmake --build build -j"$(nproc)"
 ```
 # Models
 **Maximum model parameters:** 4 billion parameters (4b)
-Note: uses base rather than instruct models where possible, though shouldn't affect performance anyway
+Note: use instruct models where possible
 **Quantisations to test:** 
 - Q3_K_M
 - Q4_K_S, Q4_K_M
 - Q5_K_S, Q5_K_M
 ## Model List
-- Qwen2.5
+- Qwen2.5: 0.5b
 - [Llama3.2](https://huggingface.co/collections/meta-llama/llama-32-66f448ffc8c32f949b04c8cf): [1b](https://huggingface.co/meta-llama/Llama-3.2-1B), [3b](https://huggingface.co/meta-llama/Llama-3.2-3B)
 - Note: [bartowski/Llama-3.2-1B-Instruct-GGUF](https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF) hosts Q4_0_8_8, Q4_0_4_8, Q4_0_4_4 quants which are apparently good for ARM chips
 - [Qwen3](https://huggingface.co/collections/Qwen/qwen3-67dd247413f0e2e4f653967f): [0.6b](https://huggingface.co/Qwen/Qwen3-0.6B), [1.7b](https://huggingface.co/Qwen/Qwen3-1.7B), [4b](https://huggingface.co/Qwen/Qwen3-4B)
