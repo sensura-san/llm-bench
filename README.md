@@ -29,7 +29,7 @@ cmake --build build -j"$(nproc)"
 **Imatrix calibration file:** https://gist.github.com/bartowski1182/eb213dccb3571f863da82e99418f81e8, found from [bartowski/Llama-3.2-1B-Instruct-GGUF](https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF) (used for quantisations)
 Note: uses base rather than instruct models where possible, though shouldn't affect performance anyway
 **Quantisations to test:** 
-- Q3_K_S, Q3_K_M, Q3_K_L
+- Q3_K_M
 - Q4_K_S, Q4_K_M
 - Q5_K_S, Q5_K_M
 ## Model List
