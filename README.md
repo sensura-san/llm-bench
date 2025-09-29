@@ -32,7 +32,6 @@ cmake --build build -j"$(nproc)"
 ```
 # Models
 **Maximum model parameters:** 4 billion parameters (4b)
-**Imatrix calibration file:** https://gist.github.com/bartowski1182/eb213dccb3571f863da82e99418f81e8, found from [bartowski/Llama-3.2-1B-Instruct-GGUF](https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF) (used for quantisations)
 Note: uses base rather than instruct models where possible, though shouldn't affect performance anyway
 **Quantisations to test:** 
 - Q3_K_M
@@ -48,8 +47,10 @@ Note: uses base rather than instruct models where possible, though shouldn't aff
 	- Pre-quantised, Quantisation Aware Trained (Q4_0): [1b](https://huggingface.co/google/gemma-3-1b-pt-qat-q4_0-gguf), [4b](https://huggingface.co/google/gemma-3-4b-pt-qat-q4_0-gguf)
 - BitNet b1.58 (NOTE: not implemented, requires different [BitNet inference framework](https://github.com/microsoft/BitNet) instead of llama.cpp)
 
-## Installation
-todo
+## Installation Example
+```bash
+ hf download Qwen/Qwen3-0.6B --local-dir models/qwen3-06b
+```
 
 ## Quantisation
 - [GGUF-my-repo](https://huggingface.co/spaces/ggml-org/gguf-my-repo): converts public repo to a quantised GGUF version on a HuggingFace Space
