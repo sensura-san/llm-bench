@@ -20,12 +20,12 @@ cmake -S . -B build -DGGML_BLAS=ON -DGGML_BLAS_VENDOR=OpenBLAS
 cmake --build build -j"$(nproc)"
 ```
 # Models
+**Maximum model parameters:** 4 billion parameters (4b)
+(Note: uses base models where possible, though shouldn't affect performance anyway)
 **Quantisations to test:** 
 - Q3_K_S, Q3_K_M, Q3_K_L
 - Q4_K_S, Q4_K_M
 - Q5_K_S, Q5_K_M
-**Maximum model parameters:** 4 billion parameters (4b)
-(Note: uses base models where possible, though shouldn't affect performance anyway)
 ## Model List
 - [Llama3.2](https://huggingface.co/collections/meta-llama/llama-32-66f448ffc8c32f949b04c8cf): [1b](https://huggingface.co/meta-llama/Llama-3.2-1B), [3b](https://huggingface.co/meta-llama/Llama-3.2-3B)
 - [Qwen3](https://huggingface.co/collections/Qwen/qwen3-67dd247413f0e2e4f653967f): [0.6b](https://huggingface.co/Qwen/Qwen3-0.6B), [1.7b](https://huggingface.co/Qwen/Qwen3-1.7B), [4b](https://huggingface.co/Qwen/Qwen3-4B)
