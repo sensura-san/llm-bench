@@ -2,8 +2,9 @@
 ## Update and install packages
 ```bash
 sudo apt update
-sudo apt install -y git build-essential cmake pkg-config libopenblas-dev jq
+sudo apt install -y git build-essential cmake pkg-config libopenblas-dev jq libcurl4-openssl-dev libssl-dev
 ```
+- `libcurl4-openssl-dev` `libssl-dev` for curl headers and libs, required for compilation
 
 ## Setup Conda environment
 ```bash
