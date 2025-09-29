@@ -7,6 +7,10 @@ sudo apt install -y git build-essential cmake pkg-config libopenblas-dev jq
 
 ## Setup Conda environment
 ```bash
+curl -fsSL https://github.com/conda-forge/miniforge/releases/download/25.3.1-0/Miniforge3-Linux-aarch64.sh -o Miniforge3-Linux-aarch64.sh
+sudo bash ./Miniforge3-Linux-aarch64.sh
+```
+```bash
 conda create -n llmbench python=3.11 -y
 conda activate llmbench
 pip install -U huggingface_hub
