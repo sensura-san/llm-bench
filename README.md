@@ -13,6 +13,11 @@ bash ~/miniforge.sh -b -p "$HOME/miniforge3"
 rm ~/miniforge.sh
 ```
 ```bash
+eval "$($HOME/miniforge3/bin/conda shell.bash hook)"
+conda init bash   # optional, makes it permanent for future shells
+exec bash         # reload shell to pick up init (or start a new terminal)
+```
+```bash
 conda create -n llmbench python=3.11 -y
 conda activate llmbench
 pip install -U huggingface_hub
