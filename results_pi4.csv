@@ -1,7 +1,0 @@
-model,quant,threads,test,n_prompt,n_gen,avg_ms,tok_s,source,datetime,run
-tinyllama,Q4_K_M,4,p,NA,NA,NA,NA,file,2025-09-24 16:19:08,1
-tinyllama,Q4_K_M,4,n,NA,NA,NA,NA,file,2025-09-24 16:19:08,1
-tinyllama,Q4_K_M,4,pg,NA,NA,NA,NA,file,2025-09-24 16:19:08,1
-tinyllama,Q5_K_M,4,p,NA,NA,NA,NA,file,2025-09-24 16:19:08,1
-tinyllama,Q5_K_M,4,n,NA,NA,NA,NA,file,2025-09-24 16:19:08,1
-tinyllama,Q5_K_M,4,pg,NA,NA,NA,NA,file,2025-09-24 16:19:08,1
