@@ -1,3 +1,6 @@
+# llm-bench
+A general bash script for easily benchmarking multiple models based on prompt processing and generation speed. Built atop llama-bench. 
+**Project focus:** Benchmarking different quantisations of LLMs for edge device computing (specifically, the Raspberry Pi 4b). 
 # Raspberry Pi Setup
 ## Update and install packages
 ```bash
@@ -31,7 +34,7 @@ cmake -S . -B build -DGGML_BLAS=ON -DGGML_BLAS_VENDOR=OpenBLAS
 cmake --build build -j"$(nproc)"
 ```
 # Models
-**Maximum model parameters:** 4 billion parameters (4b)
+**Suggested maximum model parameters:** 4 billion parameters (4b)
 Note: use instruct models where possible
 **Quantisations to test:** 
 - Q3_K_M
@@ -46,6 +49,8 @@ Note: use instruct models where possible
 - [Gemma-3](https://huggingface.co/collections/google/gemma-3-release-67c6c6f89c4f76621268bb6d): [270m](https://huggingface.co/google/gemma-3-270m), [2b](https://huggingface.co/google/gemma-3-1b-pt), [4b](https://huggingface.co/google/gemma-3-4b-pt)
 	- Unquantised, Quantisation Aware Trained (Q4_0): [270m](https://huggingface.co/google/gemma-3-270m-qat-q4_0-unquantized)
 	- Pre-quantised, Quantisation Aware Trained (Q4_0): [1b](https://huggingface.co/google/gemma-3-1b-pt-qat-q4_0-gguf), [4b](https://huggingface.co/google/gemma-3-4b-pt-qat-q4_0-gguf)
+ - [Gemma-3n](https://huggingface.co/collections/google/gemma-3n-685065323f5984ef315c93f4): [5b](https://huggingface.co/google/gemma-3n-E2B-it)
+    - Optimised for CPU/mobile devices, so possibly good for cloud
 - BitNet b1.58 (NOTE: not implemented, requires different [BitNet inference framework](https://github.com/microsoft/BitNet) instead of llama.cpp)
 
 ## Installation Example
