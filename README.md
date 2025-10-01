@@ -1,6 +1,7 @@
 # llm-bench
 A general bash script for easily benchmarking multiple models based on prompt processing and generation speed. Built atop llama-bench. 
-**Project focus:** Benchmarking different quantisations of LLMs for edge device computing (specifically, the Raspberry Pi 4b). 
+## Project focus 
+Benchmarking different quantisations of LLMs for edge device computing (specifically, the Raspberry Pi 4b). 
 # Raspberry Pi Setup
 ## Update and install packages
 ```bash
@@ -35,7 +36,9 @@ cmake --build build -j"$(nproc)"
 ```
 # Models
 **Suggested maximum model parameters:** 4 billion parameters (4b)
+
 Note: use instruct models where possible
+
 **Quantisations to test:** 
 - Q3_K_M
 - Q4_K_S, Q4_K_M
@@ -70,7 +73,3 @@ Note: use instruct models where possible
 ./llama-bench -m models/qwen3-06b/qwen3-752M-06b-Q4_K_M.gguf \
   -p 128 -n 64 -t 4 -r 1 -o json | jq .
 ```
-# TODO:
-- completely rework llm-bench shell script
-- benchmark models from ./models/*, save each run to a csv
-- update README with how to set-up llm-bench
