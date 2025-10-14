@@ -1,16 +1,11 @@
 #!/usr/bin/env bash
-# llama.cpp benchmark harness (JSON-first datetimes, hardware columns, results/ outputs)
-# - Only JSON's test_time is used (no local/system datetime).
-# - Writes raw JSON per run and a single CSV in results/.
-# - Adds CPU/GPU/features + runtime flags to CSV.
-
 set -u
 set -o pipefail
 IFS=$'\n\t'
 
 # -------- config (override via env) --------
 OUT_DIR=${OUT_DIR:-results}
-LLAMA=${LLAMA:-./bin/llama-bench}     # path to llama-bench binary
+LLAMA=${LLAMA:-$HOME/.local/bin/llama-bench}     # path to llama-bench binary
 THREADS=${THREADS:-4}
 PROMPT=${PROMPT:-256}
 GEN=${GEN:-128}
@@ -20,18 +15,14 @@ CTYPE_K=${CTYPE_K:-}                  # e.g., q8_0 or q4_0
 CTYPE_V=${CTYPE_V:-}                  # e.g., q8_0 or q4_0
 
 # Limit scope per run
-MODEL_FILTER=${MODEL_FILTER:-}        # e.g. "tinyllama qwen05b"
-QUANT_FILTER=${QUANT_FILTER:-}        # e.g. "Q4_K_M Q5_K_M"
+MODELS=${MODELS:-}                    # e.g. "tinyllama qwen05b"
+QUANTS=${QUANTS:-}                    # e.g. "Q4_K_M Q5_K_M"
 DELETE_AFTER=${DELETE_AFTER:-0}       # 1 = remove just-used hf:// cache file after each run
 
 # Model roots (edit paths to match your layout). Values are only "suggested" quants;
-# actual quants auto-detect from files unless QUANT_FILTER is set.
-declare -A MODELS=(
-  ["models/tinyllama"]="Q2_K Q3_K_M Q4_K_M Q5_K_M"
-  ["models/llama3_1b"]="Q2_K Q3_K_M Q4_K_M Q5_K_M"
-  ["models/qwen05b"]="Q2_K Q3_K_M Q4_K_M Q5_K_M"
-  ["models/gemma2_2b"]="IQ2_M Q3_K_M Q4_K_M"
-  ["models/phi3mini"]="IQ2_M IQ3_M Q3_K_M"
+# actual quants auto-detect from files unless QUANTS is set.
+declare -A MODEL_LIST=(
+  ["models/qwen3-06b"]="Q3_K_M Q4_K_S Q5_K_S Q4_K_M Q5_K_M"
 )
 
 # -------- helpers --------
@@ -52,44 +43,64 @@ write_header(){
 }
 
 append_row(){ printf "%s\n" "$*" >> "$OUT_CSV"; }
-
 pick_file(){
   local dir="$1" quant="$2"
-  shopt -s nullglob
+  # First try a case-insensitive glob (covers Q4_K_M vs q4_k_m)
+  local old_flags
+  old_flags=$(shopt -p nocaseglob || true)
+  shopt -s nocaseglob nullglob
   local matches=("$dir"/*"$quant"*.gguf)
-  shopt -u nullglob
+  # Fallback: find (case-insensitive), helpful on odd filesystems/encodings
   if (( ${#matches[@]} == 0 )); then
+    while IFS= read -r -d '' f; do matches+=("$f"); done < <(find "$dir" -maxdepth 1 -type f -iname "*${quant}*.gguf" -print0 2>/dev/null || true)
+  fi
+  # restore glob behavior
+  eval "$old_flags" 2>/dev/null || shopt -u nocaseglob
+  shopt -u nullglob
+
+  if (( ${#matches[@]} == 0 )); then
+    # allow direct hf:// via stub
     local hfstub="$dir/$quant.hfpath"
     [[ -f "$hfstub" ]] && { cat "$hfstub"; return 0; }
     return 1
   fi
-  # choose smallest match (usually lower RAM)
+
+  # choose smallest file (often the lower-RAM variant if multiples)
   local best="${matches[0]}" best_size
   best_size=$(stat -c%s "$best" 2>/dev/null || echo 0)
+  local f s
   for f in "${matches[@]}"; do
-    local s; s=$(stat -c%s "$f" 2>/dev/null || echo 0)
+    s=$(stat -c%s "$f" 2>/dev/null || echo 0)
     (( s < best_size )) && { best="$f"; best_size="$s"; }
   done
   printf "%s\n" "$best"
 }
 
-want_model(){ local n="$1"; [[ -z "$MODEL_FILTER" ]] && return 0; for m in $MODEL_FILTER; do [[ "$m" == "$n" ]] && return 0; done; return 1; }
-want_quant(){ local q="$1"; [[ -z "$QUANT_FILTER" ]] && return 0; for x in $QUANT_FILTER; do [[ "$q" == "$x" ]] && return 0; done; return 1; }
+# MODELS is a space-separated filter string; if empty, allow all models.
+want_model(){ local n="$1"; [[ -z "$MODELS" ]] && return 0; case " $MODELS " in *" $n "*) return 0;; esac; return 1; }
 
 detect_quants(){
-  local dir="$1"; local -a qs=(); declare -A seen=()
+  local dir="$1"
+  local -a qs=(); declare -A seen=()
   shopt -s nullglob
   for f in "$dir"/*.gguf; do
-    local b q; b=$(basename "$f"); q="${b##*.}"; q="${q%.gguf}"
-    [[ -n "$q" && -z "${seen[$q]:-}" ]] && { seen["$q"]=1; qs+=("$q"); }
+    [[ -e "$f" ]] || continue
+    local b q
+    b=$(basename "$f")
+    q="${b##*-}"; q="${q%.gguf}"
+    [[ -n "$q" && "$q" != "$b" && -z "${seen[$q]:-}" ]] && { seen["$q"]=1; qs+=("$q"); }
   done
+  shopt -u nullglob
+  shopt -s nullglob
   for s in "$dir"/*.hfpath; do
+    [[ -e "$s" ]] || continue
     local q; q="$(basename "$s")"; q="${q%.hfpath}"
     [[ -n "$q" && -z "${seen[$q]:-}" ]] && { seen["$q"]=1; qs+=("$q"); }
   done
   shopt -u nullglob
   printf "%s\n" "${qs[@]}"
 }
+
 
 delete_hf_cached(){
   local path="$1"
@@ -102,26 +113,26 @@ delete_hf_cached(){
 write_header
 
 # -------- run --------
-for DIR in "${!MODELS[@]}"; do
+for DIR in "${!MODEL_LIST[@]}"; do
   model="$(basename "$DIR")"
   want_model "$model" || { err "skip: $model (filtered)"; continue; }
   [[ -d "$DIR" ]] || { err "WARN: missing dir '$DIR' — skipping $model" | tee -a "$LOG" >/dev/null; continue; }
 
   # build quant list
   declare -a iter_quants=()
-  if [[ -n "$QUANT_FILTER" ]]; then
-    readarray -t iter_quants <<<"$(printf "%s\n" $QUANT_FILTER)"
+  if [[ -n "$QUANTS" ]]; then
+    readarray -t iter_quants < <(printf '%s' "$QUANTS" | tr -s '[:space:]' '\n')
   else
     readarray -t iter_quants <<<"$(detect_quants "$DIR")"
-    [[ ${#iter_quants[@]} -eq 0 ]] && readarray -t iter_quants <<<"$(printf "%s\n" ${MODELS[$DIR]})"
+    [[ ${#iter_quants[@]} -eq 0 ]] && readarray -t iter_quants <<<"$(printf "%s\n" "${MODEL_LIST[$DIR]}")"
   fi
   (( ${#iter_quants[@]} == 0 )) && { err "WARN: no quants for $model"; continue; }
 
   for Q in "${iter_quants[@]}"; do
-    want_quant "$Q" || { err "skip: $model / $Q (quant filtered)"; continue; }
-    FILE="$(pick_file "$DIR" "$Q" || true)"
-    [[ -n "$FILE" ]] || { err "skip: $model ($Q not found)" | tee -a "$LOG" >/dev/null; continue; }
-
+    if ! FILE="$(pick_file "$DIR" "$Q")"; then
+      err "skip: $model ($Q not found)" | tee -a "$LOG" >/dev/null
+      continue
+    fi
     SRC="file"; [[ "$FILE" == hf://* ]] && SRC="hf"
     echo "==> $model / $Q [$SRC]"
 
@@ -132,9 +143,9 @@ for DIR in "${!MODELS[@]}"; do
 
     # Run llama-bench for prompt, gen, and combined (array JSON)
     if ! BENCH_JSON="$(
-      timeout 600 "$LLAMA" \
-        -m "$FILE" -p "$PROMPT" -n "$GEN" -pg "${PROMPT},${GEN}" \
-        -t "$THREADS" -r "$REPS" -o json "${kv_flags[@]}" 2>>"$LOG"
+      timeout 600 "$LLAMA" -m "$FILE" -p "$PROMPT" -n "$GEN" -pg "${PROMPT},${GEN}" \
+      -r "$REPS" -o json "${kv_flags[@]}" 2>>"$LOG" \
+      -t "$THREADS"
     )"; then
       err "ERROR: bench failed for $model / $Q"
       append_row "NA,$model,$Q,$THREADS,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=$PROMPT;n=$GEN;r=$REPS;ctk=${CTYPE_K:-NA};ctv=${CTYPE_V:-NA},$SRC"
@@ -166,7 +177,7 @@ for DIR in "${!MODELS[@]}"; do
           
           t_pg:  pick_time((.n_gen // 0) > 0 and (.n_prompt // 0) > 0),
           t_any: ([ $arr[] | .test_time ] | first),
-          
+
           cpu:   pick_str("cpu_info"),
           gpu:   pick_str("gpu_info"),
           cuda:  pick_str("cuda"),
