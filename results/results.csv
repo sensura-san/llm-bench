@@ -1,34 +1,6 @@
 test_time_utc,model,quant,threads,prompt_tps,gen_tps,pg_tps,cpu_info,gpu_info,cuda,vulkan,metal,sycl,gpu_blas,blas,flash_attn,n_gpu_layers,type_k,type_v,bench_opts,source
-NA,qwen3-06b,Q3_K_M,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q3_K_M,-1,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q4_K_M,-1,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q4_K_S,-1,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q5_K_M,-1,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q5_K_S,-1,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q3_K_M,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q3_K_M,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q4_K_M,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q4_K_S,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q5_K_M,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q5_K_S,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q3_K_M,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q4_K_M,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q4_K_S,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q5_K_M,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q5_K_S,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q3_K_M,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q4_K_M,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q4_K_S,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q5_K_M,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q5_K_S,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q3_K_M,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q4_K_M,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-NA,qwen3-06b,Q4_K_S,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
-
-
-
-"2025-09-29T08:32:56Z","qwen3-06b","Q3_K_M","4","112.432817","87.790990","94.433520","OpenBLAS, Intel(R) Core(TM) Ultra 7 155H","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=256;n=128;r=3;ctk=NA;ctv=NA","file"
-"2025-09-29T08:33:27Z","qwen3-06b","Q4_K_M","4","108.124378","73.439112","88.356303","OpenBLAS, Intel(R) Core(TM) Ultra 7 155H","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=256;n=128;r=3;ctk=NA;ctv=NA","file"
-"2025-09-29T08:33:56Z","qwen3-06b","Q4_K_S","4","148.646266","74.843569","123.244535","OpenBLAS, Intel(R) Core(TM) Ultra 7 155H","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=256;n=128;r=3;ctk=NA;ctv=NA","file"
-"2025-09-29T08:34:26Z","qwen3-06b","Q5_K_M","4","92.534246","72.020556","77.499813","OpenBLAS, Intel(R) Core(TM) Ultra 7 155H","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=256;n=128;r=3;ctk=NA;ctv=NA","file"
-"2025-09-29T08:35:02Z","qwen3-06b","Q5_K_S","4","88.361387","71.322796","77.368036","OpenBLAS, Intel(R) Core(TM) Ultra 7 155H","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=256;n=128;r=3;ctk=NA;ctv=NA","file"
+2025-09-29T08:32:56Z,qwen3-06b,Q3_K_M,4,112.432817,87.79099,94.43352,"OpenBLAS, Intel(R) Core(TM) Ultra 7 155H",,NA,NA,NA,NA,NA,NA,NA,99,f16,f16,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
+2025-09-29T08:33:27Z,qwen3-06b,Q4_K_M,4,108.124378,73.439112,88.356303,"OpenBLAS, Intel(R) Core(TM) Ultra 7 155H",,NA,NA,NA,NA,NA,NA,NA,99,f16,f16,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
+2025-09-29T08:33:56Z,qwen3-06b,Q4_K_S,4,148.646266,74.843569,123.244535,"OpenBLAS, Intel(R) Core(TM) Ultra 7 155H",,NA,NA,NA,NA,NA,NA,NA,99,f16,f16,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
+2025-09-29T08:34:26Z,qwen3-06b,Q5_K_M,4,92.534246,72.020556,77.499813,"OpenBLAS, Intel(R) Core(TM) Ultra 7 155H",,NA,NA,NA,NA,NA,NA,NA,99,f16,f16,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
+2025-09-29T08:35:02Z,qwen3-06b,Q5_K_S,4,88.361387,71.322796,77.368036,"OpenBLAS, Intel(R) Core(TM) Ultra 7 155H",,NA,NA,NA,NA,NA,NA,NA,99,f16,f16,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
