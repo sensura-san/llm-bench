@@ -23,6 +23,10 @@ DELETE_AFTER=${DELETE_AFTER:-0}       # 1 = remove just-used hf:// cache file af
 # actual quants auto-detect from files unless QUANTS is set.
 declare -A MODEL_LIST=(
   ["models/qwen3-06b"]="Q3_K_M Q4_K_S Q5_K_S Q4_K_M Q5_K_M"
+  ["models/qwen25-05b-instruct"]="Q3_K_M Q5_K_S Q4_K_M Q5_K_M"
+  ["models/gemma3-270m-instruct"]="Q3_K_M Q4_K_S Q5_K_S Q4_K_M Q5_K_M"
+  ["models/gemma3n-e2b"]="F16"
+
 )
 
 # -------- helpers --------
