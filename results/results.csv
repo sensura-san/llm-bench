@@ -35,3 +35,5 @@ NA,qwen3-06b,q5_k_m,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=12
 "2025-10-14T12:35:03Z","qwen3-06b","q5_k_m","4","15.345418","5.948072","9.519552","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=256;n=128;r=3;ctk=NA;ctv=NA","file"
 "2025-10-14T12:39:33Z","qwen3-06b","q5_k_m","4","15.532327","5.92986","9.526807","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=256;n=128;r=3;ctk=NA;ctv=NA","file"
 NA,gemma3n-e2b,F16,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=256;n=128;r=3;ctk=NA;ctv=NA,file
+"2025-10-15T05:43:53Z","qwen25-05b-instruct","Q3_K_M","4","26.777332","7.333695","14.288573","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=256;n=128;r=3;ctk=NA;ctv=NA","file"
+"2025-10-15T05:46:56Z","qwen25-05b-instruct","Q4_K_M","4","26.766657","7.814032","14.84874","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=256;n=128;r=3;ctk=NA;ctv=NA","file"
