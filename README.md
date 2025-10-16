@@ -1,7 +1,7 @@
 # llm-bench
 A general bash script for easily benchmarking multiple models based on prompt processing and generation speed. Built atop llama-bench. 
 ## Project focus 
-Benchmarking different quantisations of LLMs for edge device computing (specifically, the Raspberry Pi 4b). 
+Benchmarking different quantisations of LLMs for edge device computing (specifically, the Raspberry Pi 4b) for prompt processing / token generation speed.
 # Raspberry Pi Setup
 ## Update and install packages
 ```bash
@@ -52,8 +52,9 @@ Note: use instruct models where possible
 - [Gemma-3](https://huggingface.co/collections/google/gemma-3-release-67c6c6f89c4f76621268bb6d): [270m](https://huggingface.co/google/gemma-3-270m), [2b](https://huggingface.co/google/gemma-3-1b-pt), [4b](https://huggingface.co/google/gemma-3-4b-pt)
 	- Unquantised, Quantisation Aware Trained (Q4_0): [270m](https://huggingface.co/google/gemma-3-270m-qat-q4_0-unquantized)
 	- Pre-quantised, Quantisation Aware Trained (Q4_0): [1b](https://huggingface.co/google/gemma-3-1b-pt-qat-q4_0-gguf), [4b](https://huggingface.co/google/gemma-3-4b-pt-qat-q4_0-gguf)
- - [Gemma-3n](https://huggingface.co/collections/google/gemma-3n-685065323f5984ef315c93f4): [5b](https://huggingface.co/google/gemma-3n-E2B-it)
-    - Optimised for CPU/mobile devices, so possibly good for cloud
+ - [Gemma-3n](https://huggingface.co/collections/google/gemma-3n-685065323f5984ef315c93f4): [e2b (5b)](https://huggingface.co/google/gemma-3n-E2B-it)
+    - e2b (6b) means that while it has 6 bil. parameters but effectively loads only 2 bil. params. into memory by using a novel architecture, thus reducing memory footprint
+    - Optimised for CPU/mobile devices, so possibly good for edge
 - BitNet b1.58 (NOTE: not implemented, requires different [BitNet inference framework](https://github.com/microsoft/BitNet) instead of llama.cpp)
 
 ## Installation Example
@@ -62,6 +63,30 @@ Note: use instruct models where possible
 ```
 
 ## Quantisation
+```bash
+# from Huggingface, obtain the official meta-llama/Llama-3.1-8B model weights and place them in ./models
+ls ./models
+config.json             model-00001-of-00004.safetensors  model-00004-of-00004.safetensors  README.md                tokenizer.json
+generation_config.json  model-00002-of-00004.safetensors  model.safetensors.index.json      special_tokens_map.json  USE_POLICY.md
+LICENSE                 model-00003-of-00004.safetensors  original                          tokenizer_config.json
+
+# [Optional] for PyTorch .bin models like Mistral-7B
+ls ./models
+<folder containing weights and tokenizer json>
+
+# install Python dependencies
+python3 -m pip install -r requirements.txt
+
+# convert the model to ggml FP16 format
+python3 convert_hf_to_gguf.py ./models/mymodel/
+
+# quantize the model to 4-bits (using Q4_K_M method)
+./llama-quantize ./models/mymodel/ggml-model-f16.gguf ./models/mymodel/ggml-model-Q4_K_M.gguf Q4_K_M
+
+# update the gguf filetype to current version if older version is now unsupported
+./llama-quantize ./models/mymodel/ggml-model-Q4_K_M.gguf ./models/mymodel/ggml-model-Q4_K_M-v2.gguf COPY
+```
+### Or alternatively do it online:
 - [GGUF-my-repo](https://huggingface.co/spaces/ggml-org/gguf-my-repo): converts public repo to a quantised GGUF version on a HuggingFace Space
 
 # Test a model
