@@ -52,7 +52,7 @@ Note: use instruct models where possible
 - [Gemma-3](https://huggingface.co/collections/google/gemma-3-release-67c6c6f89c4f76621268bb6d): [270m](https://huggingface.co/google/gemma-3-270m), [2b](https://huggingface.co/google/gemma-3-1b-pt), [4b](https://huggingface.co/google/gemma-3-4b-pt)
 	- Unquantised, Quantisation Aware Trained (Q4_0): [270m](https://huggingface.co/google/gemma-3-270m-qat-q4_0-unquantized)
 	- Pre-quantised, Quantisation Aware Trained (Q4_0): [1b](https://huggingface.co/google/gemma-3-1b-pt-qat-q4_0-gguf), [4b](https://huggingface.co/google/gemma-3-4b-pt-qat-q4_0-gguf)
- - [Gemma-3n](https://huggingface.co/collections/google/gemma-3n-685065323f5984ef315c93f4): [e2b (5b)](https://huggingface.co/google/gemma-3n-E2B-it)
+ - [Gemma-3n](https://huggingface.co/collections/google/gemma-3n-685065323f5984ef315c93f4): [e2b (6b)](https://huggingface.co/google/gemma-3n-E2B-it)
     - e2b (6b) means that while it has 6 bil. parameters but effectively loads only 2 bil. params. into memory by using a novel architecture, thus reducing memory footprint
     - Optimised for CPU/mobile devices, so possibly good for edge
 - BitNet b1.58 (NOTE: not implemented, requires different [BitNet inference framework](https://github.com/microsoft/BitNet) instead of llama.cpp)
