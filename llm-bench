@@ -7,9 +7,9 @@ IFS=$'\n\t'
 OUT_DIR=${OUT_DIR:-results}
 LLAMA=${LLAMA:-$HOME/.local/bin/llama-bench}     # path to llama-bench binary
 THREADS=${THREADS:-4}
-PROMPT=${PROMPT:-256}
+PROMPT=${PROMPT:-512}
 GEN=${GEN:-128}
-REPS=${REPS:-3}
+REPS=${REPS:-5}
 # Optional KV cache quantization (if your build supports it). Leave empty to skip.
 CTYPE_K=${CTYPE_K:-}                  # e.g., q8_0 or q4_0
 CTYPE_V=${CTYPE_V:-}                  # e.g., q8_0 or q4_0
