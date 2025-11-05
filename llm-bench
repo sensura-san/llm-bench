@@ -5,19 +5,21 @@ IFS=$'\n\t'
 
 # -------- config (override via env) --------
 OUT_DIR=${OUT_DIR:-results}
-LLAMA=${LLAMA:-$HOME/.local/bin/llama-bench}     # path to llama-bench binary
+LLAMA=${LLAMA:-$HOME/.local/bin/llama-bench} # path to llama-bench binary
 THREADS=${THREADS:-4}
 PROMPT=${PROMPT:-512}
 GEN=${GEN:-128}
 REPS=${REPS:-5}
 # Optional KV cache quantization (if your build supports it). Leave empty to skip.
-CTYPE_K=${CTYPE_K:-}                  # e.g., q8_0 or q4_0
-CTYPE_V=${CTYPE_V:-}                  # e.g., q8_0 or q4_0
+CTYPE_K=${CTYPE_K:-} # e.g., q8_0 or q4_0
+CTYPE_V=${CTYPE_V:-} # e.g., q8_0 or q4_0
 
 # Limit scope per run
-MODELS=${MODELS:-}                    # e.g. "tinyllama qwen05b"
-QUANTS=${QUANTS:-}                    # e.g. "Q4_K_M Q5_K_M"
-DELETE_AFTER=${DELETE_AFTER:-0}       # 1 = remove just-used hf:// cache file after each run
+MODELS=${MODELS:-}              # e.g. "tinyllama qwen05b"
+QUANTS=${QUANTS:-}              # e.g. "Q4_K_M Q5_K_M"
+DELETE_AFTER=${DELETE_AFTER:-0} # 1 = remove just-used hf:// cache file after each run
+
+COOLDOWN_SECS=${COOLDOWN_SECS:-120}
 
 # Model roots (edit paths to match your layout). Values are only "suggested" quants;
 # actual quants auto-detect from files unless QUANTS is set.
@@ -25,29 +27,41 @@ declare -A MODEL_LIST=(
   ["models/qwen3-06b"]="Q3_K_M Q4_K_S Q5_K_S Q4_K_M Q5_K_M"
   ["models/qwen25-05b-instruct"]="Q3_K_M Q5_K_S Q4_K_M Q5_K_M"
   ["models/gemma3-270m-instruct"]="Q3_K_M Q4_K_S Q5_K_S Q4_K_M Q5_K_M"
-  ["models/gemma3n-e2b"]="F16"
+  # ["models/gemma3n-e2b"]="F16"
 
 )
 
 # -------- helpers --------
-err(){ printf "%s\n" "$*" >&2; }
+err() { printf "%s\n" "$*" >&2; }
 
-mkdir -p "$OUT_DIR" || { err "Cannot create $OUT_DIR"; exit 1; }
+mkdir -p "$OUT_DIR" || {
+  err "Cannot create $OUT_DIR"
+  exit 1
+}
 OUT_CSV="$OUT_DIR/results.csv"
 LOG="$OUT_DIR/bench_errors.log"
-: > "$LOG" || { err "Cannot write $LOG"; exit 1; }
+: >"$LOG" || {
+  err "Cannot write $LOG"
+  exit 1
+}
 
-[[ -x "$LLAMA" ]] || { err "ERROR: llama-bench not found at $LLAMA"; exit 1; }
-command -v jq >/dev/null 2>&1 || { err "ERROR: 'jq' not found"; exit 1; }
+[[ -x "$LLAMA" ]] || {
+  err "ERROR: llama-bench not found at $LLAMA"
+  exit 1
+}
+command -v jq >/dev/null 2>&1 || {
+  err "ERROR: 'jq' not found"
+  exit 1
+}
 
-write_header(){
+write_header() {
   if [[ ! -s "$OUT_CSV" ]]; then
-    echo "test_time_utc,model,quant,threads,prompt_tps,gen_tps,pg_tps,cpu_info,gpu_info,cuda,vulkan,metal,sycl,gpu_blas,blas,flash_attn,n_gpu_layers,type_k,type_v,bench_opts,source" > "$OUT_CSV"
+    echo "test_time_utc,model,quant,threads,prompt_tps,gen_tps,pg_tps,cpu_info,gpu_info,cuda,vulkan,metal,sycl,gpu_blas,blas,flash_attn,n_gpu_layers,type_k,type_v,bench_opts,source" >"$OUT_CSV"
   fi
 }
 
-append_row(){ printf "%s\n" "$*" >> "$OUT_CSV"; }
-pick_file(){
+append_row() { printf "%s\n" "$*" >>"$OUT_CSV"; }
+pick_file() {
   local dir="$1" quant="$2"
   # First try a case-insensitive glob (covers Q4_K_M vs q4_k_m)
   local old_flags
@@ -55,17 +69,20 @@ pick_file(){
   shopt -s nocaseglob nullglob
   local matches=("$dir"/*"$quant"*.gguf)
   # Fallback: find (case-insensitive), helpful on odd filesystems/encodings
-  if (( ${#matches[@]} == 0 )); then
+  if ((${#matches[@]} == 0)); then
     while IFS= read -r -d '' f; do matches+=("$f"); done < <(find "$dir" -maxdepth 1 -type f -iname "*${quant}*.gguf" -print0 2>/dev/null || true)
   fi
   # restore glob behavior
   eval "$old_flags" 2>/dev/null || shopt -u nocaseglob
   shopt -u nullglob
 
-  if (( ${#matches[@]} == 0 )); then
+  if ((${#matches[@]} == 0)); then
     # allow direct hf:// via stub
     local hfstub="$dir/$quant.hfpath"
-    [[ -f "$hfstub" ]] && { cat "$hfstub"; return 0; }
+    [[ -f "$hfstub" ]] && {
+      cat "$hfstub"
+      return 0
+    }
     return 1
   fi
 
@@ -75,38 +92,55 @@ pick_file(){
   local f s
   for f in "${matches[@]}"; do
     s=$(stat -c%s "$f" 2>/dev/null || echo 0)
-    (( s < best_size )) && { best="$f"; best_size="$s"; }
+    ((s < best_size)) && {
+      best="$f"
+      best_size="$s"
+    }
   done
   printf "%s\n" "$best"
 }
 
 # MODELS is a space-separated filter string; if empty, allow all models.
-want_model(){ local n="$1"; [[ -z "$MODELS" ]] && return 0; case " $MODELS " in *" $n "*) return 0;; esac; return 1; }
+want_model() {
+  local n="$1"
+  [[ -z "$MODELS" ]] && return 0
+  case " $MODELS " in *" $n "*) return 0 ;; esac
+  return 1
+}
 
-detect_quants(){
+detect_quants() {
   local dir="$1"
-  local -a qs=(); declare -A seen=()
+  local -a qs=()
+  declare -A seen=()
   shopt -s nullglob
   for f in "$dir"/*.gguf; do
     [[ -e "$f" ]] || continue
     local b q
     b=$(basename "$f")
-    q="${b##*-}"; q="${q%.gguf}"
-    [[ -n "$q" && "$q" != "$b" && -z "${seen[$q]:-}" ]] && { seen["$q"]=1; qs+=("$q"); }
+    q="${b##*-}"
+    q="${q%.gguf}"
+    [[ -n "$q" && "$q" != "$b" && -z "${seen[$q]:-}" ]] && {
+      seen["$q"]=1
+      qs+=("$q")
+    }
   done
   shopt -u nullglob
   shopt -s nullglob
   for s in "$dir"/*.hfpath; do
     [[ -e "$s" ]] || continue
-    local q; q="$(basename "$s")"; q="${q%.hfpath}"
-    [[ -n "$q" && -z "${seen[$q]:-}" ]] && { seen["$q"]=1; qs+=("$q"); }
+    local q
+    q="$(basename "$s")"
+    q="${q%.hfpath}"
+    [[ -n "$q" && -z "${seen[$q]:-}" ]] && {
+      seen["$q"]=1
+      qs+=("$q")
+    }
   done
   shopt -u nullglob
   printf "%s\n" "${qs[@]}"
 }
 
-
-delete_hf_cached(){
+delete_hf_cached() {
   local path="$1"
   [[ "$DELETE_AFTER" != "1" || "$path" != hf://* ]] && return 0
   local cache="${XDG_CACHE_HOME:-$HOME/.cache}/llama.cpp"
@@ -119,8 +153,14 @@ write_header
 # -------- run --------
 for DIR in "${!MODEL_LIST[@]}"; do
   model="$(basename "$DIR")"
-  want_model "$model" || { err "skip: $model (filtered)"; continue; }
-  [[ -d "$DIR" ]] || { err "WARN: missing dir '$DIR' — skipping $model" | tee -a "$LOG" >/dev/null; continue; }
+  want_model "$model" || {
+    err "skip: $model (filtered)"
+    continue
+  }
+  [[ -d "$DIR" ]] || {
+    err "WARN: missing dir '$DIR' — skipping $model" | tee -a "$LOG" >/dev/null
+    continue
+  }
 
   # build quant list
   declare -a iter_quants=()
@@ -130,14 +170,18 @@ for DIR in "${!MODEL_LIST[@]}"; do
     readarray -t iter_quants <<<"$(detect_quants "$DIR")"
     [[ ${#iter_quants[@]} -eq 0 ]] && readarray -t iter_quants <<<"$(printf "%s\n" "${MODEL_LIST[$DIR]}")"
   fi
-  (( ${#iter_quants[@]} == 0 )) && { err "WARN: no quants for $model"; continue; }
+  ((${#iter_quants[@]} == 0)) && {
+    err "WARN: no quants for $model"
+    continue
+  }
 
   for Q in "${iter_quants[@]}"; do
     if ! FILE="$(pick_file "$DIR" "$Q")"; then
       err "skip: $model ($Q not found)" | tee -a "$LOG" >/dev/null
       continue
     fi
-    SRC="file"; [[ "$FILE" == hf://* ]] && SRC="hf"
+    SRC="file"
+    [[ "$FILE" == hf://* ]] && SRC="hf"
     echo "==> $model / $Q [$SRC]"
 
     # Build KV flags if provided
@@ -148,8 +192,8 @@ for DIR in "${!MODEL_LIST[@]}"; do
     # Run llama-bench for prompt, gen, and combined (array JSON)
     if ! BENCH_JSON="$(
       timeout 600 "$LLAMA" -m "$FILE" -p "$PROMPT" -n "$GEN" -pg "${PROMPT},${GEN}" \
-      -r "$REPS" -o json "${kv_flags[@]}" 2>>"$LOG" \
-      -t "$THREADS"
+        -r "$REPS" -o json "${kv_flags[@]}" \
+        -t "$THREADS" 2>>"$LOG"
     )"; then
       err "ERROR: bench failed for $model / $Q"
       append_row "NA,$model,$Q,$THREADS,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=$PROMPT;n=$GEN;r=$REPS;ctk=${CTYPE_K:-NA};ctv=${CTYPE_V:-NA},$SRC"
@@ -229,12 +273,15 @@ for DIR in "${!MODEL_LIST[@]}"; do
       // ([ .[] | .test_time ] | first)
       // "unknown"
     ')"
-    SAFE_TIME="${JSON_TIME//:/-}"             # make filename-safe (replace ":" with "-")
+    SAFE_TIME="${JSON_TIME//:/-}" # make filename-safe (replace ":" with "-")
     JSON_PATH="$OUT_DIR/${model}_${Q}_${SAFE_TIME}.json"
-    printf "%s\n" "$BENCH_JSON" > "$JSON_PATH"
+    printf "%s\n" "$BENCH_JSON" >"$JSON_PATH"
 
     delete_hf_cached "$FILE"
   done
+  # optional cooldown
+  echo "Cooling down CPU for $COOLDOWN_SECS seconds..."
+  sleep "$COOLDOWN_SECS"
 done
 
 echo "Done. CSV -> $OUT_CSV ; errors -> $LOG ; JSONs -> $OUT_DIR/"
