@@ -24,9 +24,9 @@ COOLDOWN_SECS=${COOLDOWN_SECS:-120}
 # Model roots (edit paths to match your layout). Values are only "suggested" quants;
 # actual quants auto-detect from files unless QUANTS is set.
 declare -A MODEL_LIST=(
-  ["models/qwen3-06b"]="Q3_K_M Q4_K_S Q5_K_S Q4_K_M Q5_K_M"
-  ["models/qwen25-05b-instruct"]="Q3_K_M Q5_K_S Q4_K_M Q5_K_M"
-  ["models/gemma3-270m-instruct"]="Q3_K_M Q4_K_S Q5_K_S Q4_K_M Q5_K_M"
+  ["models/qwen3-06b"]="Q4_K_S Q3_K_M Q5_K_S Q4_K_M Q5_K_M Q3_K_L Q6_K Q8_0"
+  ["models/qwen25-05b-instruct"]="Q4_K_S Q3_K_M Q5_K_S Q4_K_M Q5_K_M Q3_K_L Q6_K Q8_0"
+  ["models/gemma3-270m-instruct"]="Q4_K_S Q3_K_M Q5_K_S Q4_K_M Q5_K_M Q3_K_L Q6_K Q8_0"
   # ["models/gemma3n-e2b"]="F16"
 
 )
