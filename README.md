@@ -31,8 +31,8 @@ pip install -U huggingface_hub
 ```bash
 git clone https://github.com/ggml-org/llama.cpp
 cd llama.cpp
-cmake -S . -B build -DGGML_BLAS=ON -DGGML_BLAS_VENDOR=OpenBLAS
-cmake --build build -j"$(nproc)"
+cmake -S . -B build -DGGML_BLAS=ON -DGGML_BLAS_VENDOR=OpenBLAS -DBUILD_SHARED_LIBS=OFF
+cmake --build build --parallel
 ```
 # Models
 **Suggested maximum model parameters:** 4 billion parameters (4b)
