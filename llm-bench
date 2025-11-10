@@ -278,10 +278,11 @@ for DIR in "${!MODEL_LIST[@]}"; do
     printf "%s\n" "$BENCH_JSON" >"$JSON_PATH"
 
     delete_hf_cached "$FILE"
+
+    # optional cooldown
+    echo "Cooling down CPU for $COOLDOWN_SECS seconds..."
+    sleep "$COOLDOWN_SECS"
   done
-  # optional cooldown
-  echo "Cooling down CPU for $COOLDOWN_SECS seconds..."
-  sleep "$COOLDOWN_SECS"
 done
 
 echo "Done. CSV -> $OUT_CSV ; errors -> $LOG ; JSONs -> $OUT_DIR/"
