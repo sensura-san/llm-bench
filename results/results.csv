@@ -80,3 +80,54 @@ NA,qwen3-06b,Q5_K_M,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=12
 NA,qwen3-06b,Q5_K_S,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
 NA,qwen3-06b,Q6_K,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
 NA,qwen3-06b,Q8_0,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+NA,qwen3-06b,Q3_K_L,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+NA,qwen3-06b,Q3_K_M,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+NA,qwen3-06b,Q4_K_M,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+"2025-11-10T05:23:45Z","qwen3-06b","Q3_K_L","4","16.478073","6.88818","11.868145","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T05:33:10Z","qwen3-06b","Q3_K_M","4","17.708302","7.422499","12.496675","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T05:42:26Z","qwen3-06b","Q4_K_M","4","17.704681","6.877092","12.267546","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T05:51:46Z","qwen3-06b","Q4_K_S","4","17.372828","7.073459","12.538222","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+NA,qwen3-06b,Q5_K_M,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+NA,qwen3-06b,Q5_K_S,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+NA,qwen3-06b,Q6_K,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+NA,qwen3-06b,Q8_0,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+"2025-11-10T07:26:15Z","qwen3-06b","q5_k_m","4","18.796759","6.237485","10.996825","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+NA,qwen3-06b,q5_k_s,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+"2025-11-10T12:19:55Z","qwen25-05b-instruct","Q3_K_L","4","30.535601","7.917405","16.756465","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T12:28:35Z","qwen25-05b-instruct","Q3_K_M","4","29.107497","8.076422","16.585636","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T12:37:29Z","qwen25-05b-instruct","Q4_K_M","4","28.165291","7.390309","15.713768","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T12:46:30Z","qwen25-05b-instruct","Q4_K_S","4","28.59079","7.508862","16.004933","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T12:55:37Z","qwen25-05b-instruct","Q5_K_M","4","27.935745","6.960373","15.549992","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T13:04:46Z","qwen25-05b-instruct","Q5_K_S","4","28.43239","7.084794","15.658971","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T13:14:13Z","qwen25-05b-instruct","Q6_K","4","27.969545","6.06537","14.56858","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T13:23:56Z","qwen25-05b-instruct","Q8_0","4","28.682498","5.836722","14.420776","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T13:34:20Z","qwen3-06b","Q3_K_L","4","18.272234","6.99937","11.579405","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T13:45:49Z","qwen3-06b","Q3_K_M","4","18.029414","7.220261","11.888254","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T13:57:16Z","qwen3-06b","Q4_K_M","4","18.227936","6.782859","11.816255","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T14:08:44Z","qwen3-06b","Q4_K_S","4","18.111862","6.958433","11.667328","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T14:20:24Z","qwen3-06b","Q5_K_M","4","18.466693","6.226098","11.243012","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+NA,qwen3-06b,Q5_K_S,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+NA,qwen3-06b,Q6_K,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+NA,qwen3-06b,Q8_0,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+"2025-11-10T14:59:29Z","gemma3-270m-instruct","Q3_K_L","4","62.562819","11.828967","32.053303","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T15:04:50Z","gemma3-270m-instruct","Q3_K_M","4","77.879587","12.958194","33.165438","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T15:10:11Z","gemma3-270m-instruct","Q4_K_M","4","75.800568","12.235297","32.134716","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T15:15:33Z","gemma3-270m-instruct","Q4_K_S","4","77.09861","12.52305","32.842341","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T15:20:56Z","gemma3-270m-instruct","Q5_K_M","4","76.966216","11.919171","31.98399","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T15:26:23Z","gemma3-270m-instruct","Q5_K_S","4","75.437967","11.783289","31.807147","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T15:31:52Z","gemma3-270m-instruct","Q6_K","4","76.708952","11.3824","31.182355","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-10T15:37:24Z","gemma3-270m-instruct","Q8_0","4","77.679337","11.125334","30.71946","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-11T08:07:23Z","qwen3-06b","Q3_K_L","4","19.778532","5.929512","11.474235","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-11T08:19:11Z","qwen3-06b","Q3_K_M","4","18.113174","7.381058","11.933128","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-11T08:30:32Z","qwen3-06b","Q4_K_M","4","18.605677","6.869731","12.058925","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-11T08:41:48Z","qwen3-06b","Q4_K_S","4","18.470977","7.048578","11.872973","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-11T08:53:24Z","qwen3-06b","Q5_K_M","4","18.033262","6.318612","11.444463","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-11T09:05:09Z","qwen3-06b","Q5_K_S","4","18.180941","6.273592","11.27599","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+NA,qwen3-06b,Q6_K,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+NA,qwen3-06b,Q8_0,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+NA,qwen3-06b,Q6_K,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+NA,qwen3-06b,Q8_0,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+NA,qwen3-06b,Q6_K,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+NA,qwen3-06b,Q8_0,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+NA,qwen3-06b,q6_k,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+NA,qwen3-06b,Q8_0,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
