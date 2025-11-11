@@ -280,8 +280,10 @@ for DIR in "${!MODEL_LIST[@]}"; do
     delete_hf_cached "$FILE"
 
     # optional cooldown
-    echo "Cooling down CPU for $COOLDOWN_SECS seconds..."
-    sleep "$COOLDOWN_SECS"
+    if [[ $COOLDOWN_SECS -gt 0 ]]; then
+      echo "Cooling down CPU for $COOLDOWN_SECS seconds..."
+      sleep "$COOLDOWN_SECS"
+    fi
   done
 done
 
