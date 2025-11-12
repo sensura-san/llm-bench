@@ -131,3 +131,7 @@ NA,qwen3-06b,Q6_K,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;
 NA,qwen3-06b,Q8_0,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
 NA,qwen3-06b,q6_k,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
 NA,qwen3-06b,Q8_0,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+NA,qwen3-06b,q6_k,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+NA,qwen3-06b,Q8_0,4,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,bench:p=512;n=128;r=5;ctk=NA;ctv=NA,file
+"2025-11-12T08:20:18Z","qwen3-06b","q6_k","4","19.853868","6.212451","12.715009","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
+"2025-11-12T08:31:51Z","qwen3-06b","Q8_0","4","20.860836","4.583664","11.527374","OpenBLAS, CPU","","NA","NA","NA","NA","NA","NA","NA",99,"f16","f16","bench:p=512;n=128;r=5;ctk=NA;ctv=NA","file"
