@@ -1,0 +1,31 @@
+Starting LLM benchmark run
+Output directory: results
+Configuration: 4 threads, 512p + 128g tokens, 5 reps
+
+==> qwen3-06b / Q3_K_L [file]
+Starting LLM benchmark run
+Output directory: results
+Configuration: 4 threads, 512p + 128g tokens, 5 reps
+
+==> qwen3-06b / Q3_K_L [file]
+Starting LLM benchmark run
+Output directory: results
+Configuration: 4 threads, 512p + 128g tokens, 5 reps
+
+==> qwen3-06b / Q3_K_L [file]
+Starting LLM benchmark run
+Output directory: results
+Configuration: 4 threads, 512p + 128g tokens, 5 reps
+
+==> qwen3-06b / Q3_K_L [file]
+Benchmark timed out
+Benchmark failed for qwen3-06b / Q3_K_L
+==> qwen3-06b / Q3_K_M [file]
+Benchmark timed out
+Benchmark failed for qwen3-06b / Q3_K_M
+==> qwen3-06b / Q4_K_M [file]
+Starting LLM benchmark run
+Output directory: results
+Configuration: 4 threads, 512p + 128g tokens, 5 reps
+
+==> qwen3-06b / Q3_K_L [file]
