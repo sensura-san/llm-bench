@@ -290,7 +290,6 @@ class BenchmarkRunner:
                 cmd,
                 capture_output=True,
                 text=True,
-                timeout=600,
                 check=True
             )
 
