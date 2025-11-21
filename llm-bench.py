@@ -32,6 +32,34 @@ except ImportError:
     print("Install with: pip install matplotlib", file=sys.stderr)
 
 
+# Define once somewhere in __init__ or as a class-level constant
+COMMON_QUANTS = [
+    # --- Classic Q* baselines ---
+    "Q4_0",  # classic 4-bit
+    "Q4_1",
+    "Q5_0",
+    "Q5_1",
+    "Q8_0",  # near-lossless ref
+    # --- K-block 3-bit family ---
+    "Q3_K_S",  # smallest / most aggressive 3-bit K
+    "Q3_K_M",  # middle 3-bit K
+    "Q3_K_L",  # highest-quality 3-bit K
+    # --- K-block 4/5/6-bit family ---
+    "Q4_K_S",
+    "Q4_K_M",
+    "Q5_K_S",
+    "Q5_K_M",
+    "Q6_K",
+    # --- IQ 2–4 bit family (selected) ---
+    # "IQ2_XXS",  # very aggressive 2-bit
+    # "IQ2_XS",
+    # "IQ2_M",
+    "IQ3_XS",
+    "IQ3_M",
+    "IQ4_NL",
+]
+
+
 @dataclass
 class BenchConfig:
     """Benchmark configuration from environment variables"""
@@ -73,36 +101,9 @@ class BenchConfig:
 
         # Model definitions: {path: [default_quantizations]}
         self.model_list = {
-            self.model_dir / "qwen3-06b": [
-                "Q4_K_S",
-                "Q3_K_M",
-                "Q5_K_S",
-                "Q4_K_M",
-                "Q5_K_M",
-                "Q3_K_L",
-                "Q6_K",
-                "Q8_0",
-            ],
-            self.model_dir / "qwen25-05b-instruct": [
-                "Q4_K_S",
-                "Q3_K_M",
-                "Q5_K_S",
-                "Q4_K_M",
-                "Q5_K_M",
-                "Q3_K_L",
-                "Q6_K",
-                "Q8_0",
-            ],
-            self.model_dir / "gemma3-270m-instruct": [
-                "Q4_K_S",
-                "Q3_K_M",
-                "Q5_K_S",
-                "Q4_K_M",
-                "Q5_K_M",
-                "Q3_K_L",
-                "Q6_K",
-                "Q8_0",
-            ],
+            self.model_dir / "qwen3-06b": COMMON_QUANTS,
+            self.model_dir / "qwen25-05b-instruct": COMMON_QUANTS,
+            self.model_dir / "gemma3-270m-instruct": COMMON_QUANTS,
         }
 
 
