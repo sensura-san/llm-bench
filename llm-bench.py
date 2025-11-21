@@ -34,6 +34,7 @@ except ImportError:
 
 # Define once somewhere in __init__ or as a class-level constant
 COMMON_QUANTS = [
+    "F16",
     # --- Classic Q* baselines ---
     "Q4_0",  # classic 4-bit
     "Q4_1",
