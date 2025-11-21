@@ -102,8 +102,8 @@ class BenchConfig:
 
         # Model definitions: {path: [default_quantizations]}
         self.model_list = {
-            self.model_dir / "qwen3-06b": COMMON_QUANTS,
-            self.model_dir / "qwen25-05b-instruct": COMMON_QUANTS,
+            self.model_dir / "qwen3-0.6b": COMMON_QUANTS,
+            self.model_dir / "qwen2.5-0.5b-instruct": COMMON_QUANTS,
             self.model_dir / "gemma3-270m-instruct": COMMON_QUANTS,
             self.model_dir / "gemma3-1b-instruct": COMMON_QUANTS,
             self.model_dir / "llama3.2-1b": COMMON_QUANTS,

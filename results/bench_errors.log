@@ -349,3 +349,13 @@ Results CSV: results/results.csv
 Error log: results/bench_errors.log
 JSON files: results/*.json
 Graphs: results/benchmark_comparison.png
+ERROR: llama-bench not found at /home/ic2/.local/bin/llama-bench
+ERROR: llama-bench not found at /home/ic2/.local/bin/llama-bench
+ERROR: llama-bench not found at /home/ic2/.local/bin/llama-bench
+Starting LLM benchmark run
+Output directory: results
+Configuration: 4 threads, 512p + 128g tokens, 5 reps
+
+Model directory not found: models/qwen3-06b
+Model directory not found: models/qwen25-05b-instruct
+==> gemma3-270m-instruct / F16 [file]
