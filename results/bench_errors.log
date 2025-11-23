@@ -359,3 +359,537 @@ Configuration: 4 threads, 512p + 128g tokens, 5 reps
 Model directory not found: models/qwen3-06b
 Model directory not found: models/qwen25-05b-instruct
 ==> gemma3-270m-instruct / F16 [file]
+Starting LLM benchmark run
+Output directory: results
+Configuration: 4 threads, 512p + 128g tokens, 5 reps
+
+==> qwen3-0.6b / F16 [file]
+Starting LLM benchmark run
+Output directory: results
+Configuration: 4 threads, 512p + 128g tokens, 5 reps
+
+==> qwen3-0.6b / F16 [file]
+ERROR: llama-bench not found at /home/ic2/.local/bin/llama-bench
+Starting LLM benchmark run
+Output directory: results
+Configuration: 4 threads, 512p + 128g tokens, 5 reps
+
+==> qwen3-0.6b / F16 [file]
+  Prompt: 11.53 t/s
+  Generation: 2.81 t/s
+  Combined: 6.94 t/s
+
+Cooling down for 120s...
+==> qwen3-0.6b / IQ3_M [file]
+  Prompt: 10.34 t/s
+  Generation: 7.00 t/s
+  Combined: 9.08 t/s
+
+Cooling down for 120s...
+==> qwen3-0.6b / IQ3_XS [file]
+  Prompt: 10.35 t/s
+  Generation: 7.51 t/s
+  Combined: 9.22 t/s
+
+Cooling down for 120s...
+==> qwen3-0.6b / IQ4_NL [file]
+  Prompt: 17.19 t/s
+  Generation: 8.50 t/s
+  Combined: 13.44 t/s
+
+Cooling down for 120s...
+==> qwen3-0.6b / Q3_K_L [file]
+  Prompt: 15.76 t/s
+  Generation: 8.53 t/s
+  Combined: 12.76 t/s
+
+Cooling down for 120s...
+==> qwen3-0.6b / Q3_K_M [file]
+  Prompt: 16.97 t/s
+  Generation: 9.21 t/s
+  Combined: 13.64 t/s
+
+Cooling down for 120s...
+==> qwen3-0.6b / Q3_K_S [file]
+  Prompt: 15.20 t/s
+  Generation: 9.70 t/s
+  Combined: 12.94 t/s
+
+Cooling down for 120s...
+==> qwen3-0.6b / Q4_0 [file]
+  Prompt: 18.89 t/s
+  Generation: 8.42 t/s
+  Combined: 14.23 t/s
+
+Cooling down for 120s...
+==> qwen3-0.6b / Q4_1 [file]
+  Prompt: 18.57 t/s
+  Generation: 8.08 t/s
+  Combined: 13.94 t/s
+
+Cooling down for 120s...
+==> qwen3-0.6b / Q4_K_M [file]
+  Prompt: 19.66 t/s
+  Generation: 8.25 t/s
+  Combined: 14.45 t/s
+
+Cooling down for 120s...
+==> qwen3-0.6b / Q4_K_S [file]
+  Prompt: 20.44 t/s
+  Generation: 8.45 t/s
+  Combined: 14.92 t/s
+
+Cooling down for 120s...
+==> qwen3-0.6b / Q5_0 [file]
+  Prompt: 15.98 t/s
+  Generation: 7.60 t/s
+  Combined: 12.42 t/s
+
+Cooling down for 120s...
+==> qwen3-0.6b / Q5_1 [file]
+  Prompt: 15.55 t/s
+  Generation: 7.20 t/s
+  Combined: 12.02 t/s
+
+Cooling down for 120s...
+==> qwen3-0.6b / Q5_K_M [file]
+  Prompt: 16.70 t/s
+  Generation: 7.51 t/s
+  Combined: 12.67 t/s
+
+Cooling down for 120s...
+==> qwen3-0.6b / Q5_K_S [file]
+  Prompt: 16.79 t/s
+  Generation: 7.55 t/s
+  Combined: 12.79 t/s
+
+Cooling down for 120s...
+==> qwen3-0.6b / Q6_K [file]
+  Prompt: 15.79 t/s
+  Generation: 6.81 t/s
+  Combined: 11.96 t/s
+
+Cooling down for 120s...
+==> qwen3-0.6b / Q8_0 [file]
+  Prompt: 19.80 t/s
+  Generation: 5.04 t/s
+  Combined: 11.94 t/s
+
+Cooling down for 120s...
+==> qwen2.5-0.5b-instruct / F16 [file]
+  Prompt: 17.81 t/s
+  Generation: 3.66 t/s
+  Combined: 9.90 t/s
+
+Cooling down for 120s...
+==> qwen2.5-0.5b-instruct / IQ3_M [file]
+  Prompt: 19.76 t/s
+  Generation: 9.23 t/s
+  Combined: 15.64 t/s
+
+Cooling down for 120s...
+==> qwen2.5-0.5b-instruct / IQ3_XS [file]
+  Prompt: 19.21 t/s
+  Generation: 9.00 t/s
+  Combined: 15.25 t/s
+
+Cooling down for 120s...
+==> qwen2.5-0.5b-instruct / IQ4_NL [file]
+  Prompt: 24.71 t/s
+  Generation: 9.77 t/s
+  Combined: 18.34 t/s
+
+Cooling down for 120s...
+==> qwen2.5-0.5b-instruct / Q3_K_L [file]
+  Prompt: 24.30 t/s
+  Generation: 9.43 t/s
+  Combined: 17.93 t/s
+
+Cooling down for 120s...
+==> qwen2.5-0.5b-instruct / Q3_K_M [file]
+  Prompt: 25.80 t/s
+  Generation: 9.70 t/s
+  Combined: 18.74 t/s
+
+Cooling down for 120s...
+==> qwen2.5-0.5b-instruct / Q3_K_S [file]
+  Prompt: 23.73 t/s
+  Generation: 10.07 t/s
+  Combined: 18.14 t/s
+
+Cooling down for 120s...
+==> qwen2.5-0.5b-instruct / Q4_0 [file]
+  Prompt: 27.47 t/s
+  Generation: 9.84 t/s
+  Combined: 19.54 t/s
+
+Cooling down for 120s...
+==> qwen2.5-0.5b-instruct / Q4_1 [file]
+  Prompt: 27.19 t/s
+  Generation: 9.14 t/s
+  Combined: 18.92 t/s
+
+Cooling down for 120s...
+==> qwen2.5-0.5b-instruct / Q4_K_M [file]
+  Prompt: 24.34 t/s
+  Generation: 9.17 t/s
+  Combined: 17.72 t/s
+
+Cooling down for 120s...
+==> qwen2.5-0.5b-instruct / Q4_K_S [file]
+  Prompt: 24.30 t/s
+  Generation: 9.11 t/s
+  Combined: 17.68 t/s
+
+Cooling down for 120s...
+==> qwen2.5-0.5b-instruct / Q5_0 [file]
+  Prompt: 22.81 t/s
+  Generation: 8.89 t/s
+  Combined: 16.86 t/s
+
+Cooling down for 120s...
+==> qwen2.5-0.5b-instruct / Q5_1 [file]
+  Prompt: 22.04 t/s
+  Generation: 8.34 t/s
+  Combined: 16.10 t/s
+
+Cooling down for 120s...
+==> qwen2.5-0.5b-instruct / Q5_K_M [file]
+  Prompt: 22.38 t/s
+  Generation: 8.43 t/s
+  Combined: 16.35 t/s
+
+Cooling down for 120s...
+==> qwen2.5-0.5b-instruct / Q5_K_S [file]
+  Prompt: 22.44 t/s
+  Generation: 8.63 t/s
+  Combined: 16.57 t/s
+
+Cooling down for 120s...
+==> qwen2.5-0.5b-instruct / Q6_K [file]
+  Prompt: 26.59 t/s
+  Generation: 7.12 t/s
+  Combined: 16.73 t/s
+
+Cooling down for 120s...
+==> qwen2.5-0.5b-instruct / Q8_0 [file]
+  Prompt: 29.19 t/s
+  Generation: 6.78 t/s
+  Combined: 17.08 t/s
+
+Cooling down for 120s...
+==> gemma3-270m-instruct / F16 [file]
+  Prompt: 56.09 t/s
+  Generation: 6.68 t/s
+  Combined: 21.81 t/s
+
+Cooling down for 120s...
+==> gemma3-270m-instruct / IQ3_M [file]
+  Prompt: 61.91 t/s
+  Generation: 14.08 t/s
+  Combined: 35.35 t/s
+
+Cooling down for 120s...
+==> gemma3-270m-instruct / IQ3_XS [file]
+  Prompt: 54.96 t/s
+  Generation: 14.10 t/s
+  Combined: 33.42 t/s
+
+Cooling down for 120s...
+==> gemma3-270m-instruct / IQ4_NL [file]
+  Prompt: 70.59 t/s
+  Generation: 14.54 t/s
+  Combined: 37.92 t/s
+
+Cooling down for 120s...
+==> gemma3-270m-instruct / Q3_K_L [file]
+  Prompt: 69.79 t/s
+  Generation: 14.30 t/s
+  Combined: 37.59 t/s
+
+Cooling down for 120s...
+==> gemma3-270m-instruct / Q3_K_M [file]
+  Prompt: 73.88 t/s
+  Generation: 14.51 t/s
+  Combined: 38.96 t/s
+
+Cooling down for 120s...
+==> gemma3-270m-instruct / Q3_K_S [file]
+  Prompt: 68.28 t/s
+  Generation: 14.79 t/s
+  Combined: 37.72 t/s
+
+Cooling down for 120s...
+==> gemma3-270m-instruct / Q4_0 [file]
+  Prompt: 76.62 t/s
+  Generation: 14.10 t/s
+  Combined: 38.88 t/s
+
+Cooling down for 120s...
+==> gemma3-270m-instruct / Q4_1 [file]
+  Prompt: 75.96 t/s
+  Generation: 14.15 t/s
+  Combined: 38.67 t/s
+
+Cooling down for 120s...
+==> gemma3-270m-instruct / Q4_K_M [file]
+  Prompt: 68.87 t/s
+  Generation: 13.86 t/s
+  Combined: 36.81 t/s
+
+Cooling down for 120s...
+==> gemma3-270m-instruct / Q4_K_S [file]
+  Prompt: 70.90 t/s
+  Generation: 14.05 t/s
+  Combined: 37.61 t/s
+
+Cooling down for 120s...
+==> gemma3-270m-instruct / Q5_0 [file]
+  Prompt: 65.38 t/s
+  Generation: 13.56 t/s
+  Combined: 35.82 t/s
+
+Cooling down for 120s...
+==> gemma3-270m-instruct / Q5_1 [file]
+  Prompt: 64.47 t/s
+  Generation: 13.56 t/s
+  Combined: 35.19 t/s
+
+Cooling down for 120s...
+==> gemma3-270m-instruct / Q5_K_M [file]
+  Prompt: 64.90 t/s
+  Generation: 13.49 t/s
+  Combined: 35.30 t/s
+
+Cooling down for 120s...
+==> gemma3-270m-instruct / Q5_K_S [file]
+  Prompt: 65.66 t/s
+  Generation: 13.59 t/s
+  Combined: 35.56 t/s
+
+Cooling down for 120s...
+==> gemma3-270m-instruct / Q6_K [file]
+  Prompt: 74.78 t/s
+  Generation: 12.45 t/s
+  Combined: 35.83 t/s
+
+Cooling down for 120s...
+==> gemma3-270m-instruct / Q8_0 [file]
+  Prompt: 79.22 t/s
+  Generation: 12.19 t/s
+  Combined: 36.32 t/s
+
+Cooling down for 120s...
+==> gemma3-1b-instruct / F16 [file]
+  Prompt: 9.59 t/s
+  Generation: 1.82 t/s
+  Combined: 5.15 t/s
+
+Cooling down for 120s...
+==> gemma3-1b-instruct / IQ3_M [file]
+  Prompt: 10.81 t/s
+  Generation: 4.53 t/s
+  Combined: 8.37 t/s
+
+Cooling down for 120s...
+==> gemma3-1b-instruct / IQ3_XS [file]
+  Prompt: 9.96 t/s
+  Generation: 4.48 t/s
+  Combined: 7.90 t/s
+
+Cooling down for 120s...
+==> gemma3-1b-instruct / IQ4_NL [file]
+  Prompt: 13.62 t/s
+  Generation: 4.81 t/s
+  Combined: 9.83 t/s
+
+Cooling down for 120s...
+==> gemma3-1b-instruct / Q3_K_L [file]
+  Prompt: 13.45 t/s
+  Generation: 4.70 t/s
+  Combined: 9.66 t/s
+
+Cooling down for 120s...
+==> gemma3-1b-instruct / Q3_K_M [file]
+  Prompt: 14.52 t/s
+  Generation: 4.90 t/s
+  Combined: 10.25 t/s
+
+Cooling down for 120s...
+==> gemma3-1b-instruct / Q3_K_S [file]
+  Prompt: 13.02 t/s
+  Generation: 5.01 t/s
+  Combined: 9.69 t/s
+
+Cooling down for 120s...
+==> gemma3-1b-instruct / Q4_0 [file]
+  Prompt: 15.35 t/s
+  Generation: 4.88 t/s
+  Combined: 10.57 t/s
+
+Cooling down for 120s...
+==> gemma3-1b-instruct / Q4_1 [file]
+  Prompt: 15.18 t/s
+  Generation: 4.64 t/s
+  Combined: 10.28 t/s
+
+Cooling down for 120s...
+==> gemma3-1b-instruct / Q4_K_M [file]
+  Prompt: 13.05 t/s
+  Generation: 4.32 t/s
+  Combined: 9.18 t/s
+
+Cooling down for 120s...
+==> gemma3-1b-instruct / Q4_K_S [file]
+  Prompt: 13.65 t/s
+  Generation: 4.52 t/s
+  Combined: 9.57 t/s
+
+Cooling down for 120s...
+==> gemma3-1b-instruct / Q5_0 [file]
+  Prompt: 12.49 t/s
+  Generation: 4.39 t/s
+  Combined: 8.99 t/s
+
+Cooling down for 120s...
+==> gemma3-1b-instruct / Q5_1 [file]
+  Prompt: 12.05 t/s
+  Generation: 4.18 t/s
+  Combined: 8.66 t/s
+
+Cooling down for 120s...
+==> gemma3-1b-instruct / Q5_K_M [file]
+  Prompt: 12.29 t/s
+  Generation: 4.21 t/s
+  Combined: 8.75 t/s
+
+Cooling down for 120s...
+==> gemma3-1b-instruct / Q5_K_S [file]
+  Prompt: 12.38 t/s
+  Generation: 4.28 t/s
+  Combined: 8.84 t/s
+
+Cooling down for 120s...
+==> gemma3-1b-instruct / Q6_K [file]
+  Prompt: 14.46 t/s
+  Generation: 3.58 t/s
+  Combined: 8.89 t/s
+
+Cooling down for 120s...
+==> gemma3-1b-instruct / Q8_0 [file]
+  Prompt: 16.14 t/s
+  Generation: 3.39 t/s
+  Combined: 9.11 t/s
+
+Cooling down for 120s...
+==> llama3.2-1b / F16 [file]
+  Prompt: 5.02 t/s
+  Generation: 1.48 t/s
+  Combined: 3.35 t/s
+
+Cooling down for 120s...
+==> llama3.2-1b / IQ3_M [file]
+  Prompt: 5.21 t/s
+  Generation: 3.68 t/s
+  Combined: 4.74 t/s
+
+Cooling down for 120s...
+==> llama3.2-1b / IQ3_XS [file]
+  Prompt: 5.64 t/s
+  Generation: 3.93 t/s
+  Combined: 5.11 t/s
+
+Cooling down for 120s...
+==> llama3.2-1b / IQ4_NL [file]
+  Prompt: 9.91 t/s
+  Generation: 4.57 t/s
+  Combined: 7.84 t/s
+
+Cooling down for 120s...
+==> llama3.2-1b / Q3_K_L [file]
+  Prompt: 9.01 t/s
+  Generation: 4.82 t/s
+  Combined: 7.50 t/s
+
+Cooling down for 120s...
+==> llama3.2-1b / Q3_K_M [file]
+  Prompt: 9.72 t/s
+  Generation: 5.10 t/s
+  Combined: 8.04 t/s
+
+Cooling down for 120s...
+==> llama3.2-1b / Q3_K_S [file]
+  Prompt: 8.72 t/s
+  Generation: 5.41 t/s
+  Combined: 7.57 t/s
+
+Cooling down for 120s...
+==> llama3.2-1b / Q4_0 [file]
+  Prompt: 11.35 t/s
+  Generation: 4.61 t/s
+  Combined: 8.55 t/s
+
+Cooling down for 120s...
+==> llama3.2-1b / Q4_1 [file]
+  Prompt: 11.11 t/s
+  Generation: 4.26 t/s
+  Combined: 8.14 t/s
+
+Cooling down for 120s...
+==> llama3.2-1b / Q4_K_M [file]
+  Prompt: 11.86 t/s
+  Generation: 4.47 t/s
+  Combined: 8.69 t/s
+
+Cooling down for 120s...
+==> llama3.2-1b / Q4_K_S [file]
+  Prompt: 12.40 t/s
+  Generation: 4.61 t/s
+  Combined: 9.04 t/s
+
+Cooling down for 120s...
+==> llama3.2-1b / Q5_0 [file]
+  Prompt: 9.14 t/s
+  Generation: 4.02 t/s
+  Combined: 7.14 t/s
+
+Cooling down for 120s...
+==> llama3.2-1b / Q5_1 [file]
+  Prompt: 8.91 t/s
+  Generation: 3.75 t/s
+  Combined: 6.84 t/s
+
+Cooling down for 120s...
+==> llama3.2-1b / Q5_K_M [file]
+  Prompt: 9.53 t/s
+  Generation: 3.98 t/s
+  Combined: 7.30 t/s
+
+Cooling down for 120s...
+==> llama3.2-1b / Q5_K_S [file]
+  Prompt: 9.65 t/s
+  Generation: 4.05 t/s
+  Combined: 7.41 t/s
+
+Cooling down for 120s...
+==> llama3.2-1b / Q6_K [file]
+  Prompt: 8.97 t/s
+  Generation: 3.61 t/s
+  Combined: 6.76 t/s
+
+Cooling down for 120s...
+==> llama3.2-1b / Q8_0 [file]
+  Prompt: 11.80 t/s
+  Generation: 2.76 t/s
+  Combined: 6.99 t/s
+
+Cooling down for 120s...
+
+Generating visualization graphs...
+Saved visualization: results/benchmark_comparison.png
+
+Benchmark complete!
+Results CSV: results/results.csv
+Error log: results/bench_errors.log
+JSON files: results/*.json
+Graphs: results/benchmark_comparison.png
