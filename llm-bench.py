@@ -11,6 +11,7 @@ import os
 import subprocess
 import sys
 import time
+from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -567,31 +568,23 @@ class BenchmarkRunner:
 
         self.logger.info("\nGenerating visualization graphs...")
 
-        # Filter results with valid metrics
         valid_results = [
             r for r in self.results if r.prompt_tps or r.gen_tps or r.pg_tps
         ]
-
         if not valid_results:
             self.logger.warning("No valid results for graphing")
             return
 
-        # Group results by model and calculate averages
-        from collections import defaultdict
-
         model_groups = defaultdict(list)
-
         for result in valid_results:
             model_groups[result.model].append(result)
 
-        # Calculate average performance per model (using combined speed as primary metric)
         model_averages = {}
         for model, results in model_groups.items():
             avg_speeds = [r.pg_tps for r in results if r.pg_tps]
             if avg_speeds:
                 model_averages[model] = sum(avg_speeds) / len(avg_speeds)
             else:
-                # Fallback to other metrics
                 fallback = []
                 for r in results:
                     if r.gen_tps:
@@ -600,33 +593,43 @@ class BenchmarkRunner:
                         fallback.append(r.prompt_tps)
                 model_averages[model] = sum(fallback) / len(fallback) if fallback else 0
 
-        # Sort models by average performance (descending)
         sorted_models = sorted(
             model_averages.keys(), key=lambda m: model_averages[m], reverse=True
         )
 
-        # Reorganize results: group by model, sorted by model average
         organized_results = []
         for model in sorted_models:
-            # Add all quants for this model (in order they appear)
             organized_results.extend(model_groups[model])
 
-        # Prepare data from organized results
         labels = [f"{r.model}\n{r.quant}" for r in organized_results]
         prompt_speeds = [r.prompt_tps if r.prompt_tps else 0 for r in organized_results]
         gen_speeds = [r.gen_tps if r.gen_tps else 0 for r in organized_results]
         combined_speeds = [r.pg_tps if r.pg_tps else 0 for r in organized_results]
 
-        # Generate timestamp for filenames
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 
-        # Calculate dynamic figure width based on number of results
         num_results = len(organized_results)
-        bar_width_per_result = 0.8  # inches per bar
+        bar_width_per_result = 0.8
         min_width = 10
         individual_fig_width = max(min_width, num_results * bar_width_per_result)
 
-        # Helper function to add value labels on bars
+        model_x_indices = defaultdict(list)
+        for idx, r in enumerate(organized_results):
+            model_x_indices[r.model].append(idx)
+
+        model_group_centers = []
+        for model in sorted_models:
+            indices = model_x_indices[model]
+            center = (min(indices) + max(indices)) / 2.0
+            model_group_centers.append((model, center, model_averages.get(model, 0.0)))
+
+        cmap = plt.get_cmap("tab20")
+        model_colors = {}
+        for i, model in enumerate(sorted_models):
+            model_colors[model] = cmap(i % cmap.N)
+
+        bar_colors_by_model = [model_colors[r.model] for r in organized_results]
+
         def add_bar_labels(ax, bars):
             for bar in bars:
                 height = bar.get_height()
@@ -640,26 +643,43 @@ class BenchmarkRunner:
                         fontsize=9,
                     )
 
-        # Helper function to format x-axis labels and add visual grouping
         def format_xaxis(ax, labels_list, x_positions):
-            ax.set_xticks(x_positions)
+            ax.set_xticks(list(x_positions))
             ax.set_xticklabels(labels_list, rotation=90, ha="center", fontsize=9)
             ax.grid(axis="y", alpha=0.3)
             ax.margins(x=0.01)
 
-            # Add visual separation between model groups
             prev_model = None
             for i, result in enumerate(organized_results):
                 if prev_model and result.model != prev_model:
-                    # Draw vertical line between model groups
                     ax.axvline(
                         x=i - 0.5, color="gray", linestyle="--", linewidth=1, alpha=0.5
                     )
                 prev_model = result.model
 
-        # --- Individual Graph 1: Prompt Processing Speed ---
+            ylim = ax.get_ylim()
+            y_min, y_max = ylim
+            span = y_max - y_min
+            text_y = y_max + span * 0.05
+
+            for model_name, center_x, avg_val in model_group_centers:
+                if avg_val > 0:
+                    ax.text(
+                        center_x,
+                        text_y,
+                        f"{model_name}\navg={avg_val:.1f}",
+                        ha="center",
+                        va="bottom",
+                        fontsize=8,
+                        clip_on=False,
+                    )
+
+            ax.set_ylim(y_min, y_max + span * 0.12)
+
         fig1, ax1 = plt.subplots(figsize=(individual_fig_width, 8))
-        bars1 = ax1.bar(range(len(labels)), prompt_speeds, color="steelblue", alpha=0.7)
+        bars1 = ax1.bar(
+            range(len(labels)), prompt_speeds, color=bar_colors_by_model, alpha=0.7
+        )
         ax1.set_title("Prompt Processing Speed", fontsize=14, fontweight="bold", pad=20)
         ax1.set_ylabel("Tokens/Second", fontsize=12)
         format_xaxis(ax1, labels, range(len(labels)))
@@ -670,9 +690,10 @@ class BenchmarkRunner:
         self.logger.info(f"Saved visualization: {graph_path_1}")
         plt.close(fig1)
 
-        # --- Individual Graph 2: Generation Speed ---
         fig2, ax2 = plt.subplots(figsize=(individual_fig_width, 8))
-        bars2 = ax2.bar(range(len(labels)), gen_speeds, color="coral", alpha=0.7)
+        bars2 = ax2.bar(
+            range(len(labels)), gen_speeds, color=bar_colors_by_model, alpha=0.7
+        )
         ax2.set_title("Text Generation Speed", fontsize=14, fontweight="bold", pad=20)
         ax2.set_ylabel("Tokens/Second", fontsize=12)
         format_xaxis(ax2, labels, range(len(labels)))
@@ -685,10 +706,9 @@ class BenchmarkRunner:
         self.logger.info(f"Saved visualization: {graph_path_2}")
         plt.close(fig2)
 
-        # --- Individual Graph 3: Combined Speed ---
         fig3, ax3 = plt.subplots(figsize=(individual_fig_width, 8))
         bars3 = ax3.bar(
-            range(len(labels)), combined_speeds, color="mediumseagreen", alpha=0.7
+            range(len(labels)), combined_speeds, color=bar_colors_by_model, alpha=0.7
         )
         ax3.set_title(
             "Combined (Prompt + Generation) Speed",
@@ -705,25 +725,35 @@ class BenchmarkRunner:
         self.logger.info(f"Saved visualization: {graph_path_3}")
         plt.close(fig3)
 
-        # --- Individual Graph 4: All Metrics Comparison (Grouped Bar) ---
         fig4, ax4 = plt.subplots(figsize=(individual_fig_width, 8))
-        x = range(len(labels))
+        x = list(range(len(labels)))
         width = 0.25
+        colors_prompt = [model_colors[r.model] for r in organized_results]
+        colors_gen = [model_colors[r.model] for r in organized_results]
+        colors_comb = [model_colors[r.model] for r in organized_results]
+
         ax4.bar(
             [i - width for i in x],
             prompt_speeds,
             width,
             label="Prompt",
-            color="steelblue",
+            color=colors_prompt,
             alpha=0.7,
         )
-        ax4.bar(x, gen_speeds, width, label="Generation", color="coral", alpha=0.7)
+        ax4.bar(
+            x,
+            gen_speeds,
+            width,
+            label="Generation",
+            color=colors_gen,
+            alpha=0.7,
+        )
         ax4.bar(
             [i + width for i in x],
             combined_speeds,
             width,
             label="Combined",
-            color="mediumseagreen",
+            color=colors_comb,
             alpha=0.7,
         )
         ax4.set_title("All Metrics Comparison", fontsize=14, fontweight="bold", pad=20)
@@ -736,32 +766,31 @@ class BenchmarkRunner:
         self.logger.info(f"Saved visualization: {graph_path_4}")
         plt.close(fig4)
 
-        # --- Combined 2x2 Grid (Original) ---
-        # Calculate combined figure width
         combined_fig_width = max(16, num_results * 0.4)
         fig, axes = plt.subplots(2, 2, figsize=(combined_fig_width, 12))
         fig.suptitle("LLM Benchmark Results Comparison", fontsize=16, fontweight="bold")
 
-        # Plot 1: Prompt Processing Speed
         ax1 = axes[0, 0]
-        bars1 = ax1.bar(range(len(labels)), prompt_speeds, color="steelblue", alpha=0.7)
+        bars1 = ax1.bar(
+            range(len(labels)), prompt_speeds, color=bar_colors_by_model, alpha=0.7
+        )
         ax1.set_title("Prompt Processing Speed", fontsize=12, fontweight="bold")
         ax1.set_ylabel("Tokens/Second")
         format_xaxis(ax1, labels, range(len(labels)))
         add_bar_labels(ax1, bars1)
 
-        # Plot 2: Generation Speed
         ax2 = axes[0, 1]
-        bars2 = ax2.bar(range(len(labels)), gen_speeds, color="coral", alpha=0.7)
+        bars2 = ax2.bar(
+            range(len(labels)), gen_speeds, color=bar_colors_by_model, alpha=0.7
+        )
         ax2.set_title("Text Generation Speed", fontsize=12, fontweight="bold")
         ax2.set_ylabel("Tokens/Second")
         format_xaxis(ax2, labels, range(len(labels)))
         add_bar_labels(ax2, bars2)
 
-        # Plot 3: Combined Speed
         ax3 = axes[1, 0]
         bars3 = ax3.bar(
-            range(len(labels)), combined_speeds, color="mediumseagreen", alpha=0.7
+            range(len(labels)), combined_speeds, color=bar_colors_by_model, alpha=0.7
         )
         ax3.set_title(
             "Combined (Prompt + Generation) Speed", fontsize=12, fontweight="bold"
@@ -770,35 +799,49 @@ class BenchmarkRunner:
         format_xaxis(ax3, labels, range(len(labels)))
         add_bar_labels(ax3, bars3)
 
-        # Plot 4: All Metrics Comparison
         ax4 = axes[1, 1]
-        x = range(len(labels))
-        width = 0.25
         ax4.bar(
             [i - width for i in x],
             prompt_speeds,
             width,
             label="Prompt",
-            color="steelblue",
+            color=colors_prompt,
             alpha=0.7,
         )
-        ax4.bar(x, gen_speeds, width, label="Generation", color="coral", alpha=0.7)
+        ax4.bar(
+            x,
+            gen_speeds,
+            width,
+            label="Generation",
+            color=colors_gen,
+            alpha=0.7,
+        )
         ax4.bar(
             [i + width for i in x],
             combined_speeds,
             width,
             label="Combined",
-            color="mediumseagreen",
+            color=colors_comb,
             alpha=0.7,
         )
         ax4.set_title("All Metrics Comparison", fontsize=12, fontweight="bold")
         ax4.set_ylabel("Tokens/Second")
         format_xaxis(ax4, labels, x)
-        ax4.legend()
+        handles = []
+        for model in sorted_models:
+            handles.append(
+                plt.Line2D(
+                    [0],
+                    [0],
+                    marker="s",
+                    linestyle="",
+                    label=model,
+                    color=model_colors[model],
+                )
+            )
+        ax4.legend(handles=handles, title="Models", fontsize=8, title_fontsize=9)
 
         plt.tight_layout()
-
-        # Save combined figure
         graph_path_combined = (
             self.config.out_dir / f"benchmark_comparison_{timestamp}.png"
         )
