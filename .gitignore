@@ -1,4 +1,5 @@
 models/*/*
+results/bench_errors.log
 llama.cpp
 temp.sh
 
