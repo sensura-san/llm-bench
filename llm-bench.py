@@ -32,6 +32,84 @@ except ImportError:
     print("Install with: pip install matplotlib", file=sys.stderr)
 
 
+def print_help() -> None:
+    """Print usage and environment configuration help."""
+    help_text = """
+Usage:
+  llm-bench.py
+      Run full benchmark for all configured models and quantizations,
+      write CSV + JSON results, and generate graphs (if enabled).
+
+  llm-bench.py --graphs-only [results.csv]
+      Skip benchmarking. Load an existing CSV file (default: results/results.csv)
+      and generate graphs only.
+
+Environment variables (configuration):
+
+  OUT_DIR           Output directory for CSV, JSON, and graphs.
+                    Default: results
+
+  MODEL_DIR         Base directory containing model subdirectories (each with *.gguf or *.hfpath).
+                    Default: models
+
+  LLAMA             Path to the llama-bench binary.
+                    Default: ~/.local/bin/llama-bench
+
+  THREADS           Number of threads to use for benchmarking.
+                    Default: 4
+
+  PROMPT            Number of prompt tokens (-p).
+                    Default: 512
+
+  GEN               Number of generation tokens (-n).
+                    Default: 128
+
+  REPS              Number of repetitions (-r) per benchmark configuration.
+                    Default: 5
+
+  CTYPE_K           KV cache type for K (passed as --cache-type-k).
+                    Default: (empty / not set)
+
+  CTYPE_V           KV cache type for V (passed as --cache-type-v).
+                    Default: (empty / not set)
+
+  MODELS            Space-separated list of model directory names to include.
+                    Example: "gemma3-1b-instruct llama3.2-1b"
+                    Default: all models in BenchConfig.model_list
+
+  QUANTS            Space-separated list of quant names to include.
+                    Example: "Q4_K_M Q5_K_M Q6_K"
+                    Default: auto-detected from *.gguf / *.hfpath or COMMON_QUANTS
+
+  DELETE_AFTER      If set to "1", delete Hugging Face cached files after each run
+                    (only applies to hf:// paths).
+                    Default: 0
+
+  COOLDOWN_SECS     Seconds to sleep between benchmarks.
+                    Default: 120
+
+  GENERATE_GRAPHS   If "1", generate graphs after benchmarks / when using --graphs-only.
+                    If "0", skip graph generation.
+                    Default: 1
+
+Notes:
+  - Results are appended to OUT_DIR/results.csv.
+  - Raw llama-bench JSON output is stored per run as OUT_DIR/<model>_<quant>_<timestamp>.json.
+  - Graph images are saved into OUT_DIR as PNG files.
+
+Examples:
+  # Basic run with defaults
+  OUT_DIR=results MODEL_DIR=models ./llm-bench.py
+
+  # Only benchmark specific quantizations
+  QUANTS="Q4_K_M Q5_K_M" ./llm-bench.py
+
+  # Only generate graphs from an existing CSV
+  ./llm-bench.py --graphs-only path/to/results.csv
+"""
+    print(help_text.strip())
+
+
 # Define once somewhere in __init__ or as a class-level constant
 COMMON_QUANTS = [
     "F16",
@@ -498,14 +576,170 @@ class BenchmarkRunner:
             self.logger.warning("No valid results for graphing")
             return
 
-        # Prepare data
-        labels = [f"{r.model}\n{r.quant}" for r in valid_results]
-        prompt_speeds = [r.prompt_tps if r.prompt_tps else 0 for r in valid_results]
-        gen_speeds = [r.gen_tps if r.gen_tps else 0 for r in valid_results]
-        combined_speeds = [r.pg_tps if r.pg_tps else 0 for r in valid_results]
+        # Group results by model and calculate averages
+        from collections import defaultdict
 
-        # Create figure with subplots
-        fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+        model_groups = defaultdict(list)
+
+        for result in valid_results:
+            model_groups[result.model].append(result)
+
+        # Calculate average performance per model (using combined speed as primary metric)
+        model_averages = {}
+        for model, results in model_groups.items():
+            avg_speeds = [r.pg_tps for r in results if r.pg_tps]
+            if avg_speeds:
+                model_averages[model] = sum(avg_speeds) / len(avg_speeds)
+            else:
+                # Fallback to other metrics
+                fallback = []
+                for r in results:
+                    if r.gen_tps:
+                        fallback.append(r.gen_tps)
+                    elif r.prompt_tps:
+                        fallback.append(r.prompt_tps)
+                model_averages[model] = sum(fallback) / len(fallback) if fallback else 0
+
+        # Sort models by average performance (descending)
+        sorted_models = sorted(
+            model_averages.keys(), key=lambda m: model_averages[m], reverse=True
+        )
+
+        # Reorganize results: group by model, sorted by model average
+        organized_results = []
+        for model in sorted_models:
+            # Add all quants for this model (in order they appear)
+            organized_results.extend(model_groups[model])
+
+        # Prepare data from organized results
+        labels = [f"{r.model}\n{r.quant}" for r in organized_results]
+        prompt_speeds = [r.prompt_tps if r.prompt_tps else 0 for r in organized_results]
+        gen_speeds = [r.gen_tps if r.gen_tps else 0 for r in organized_results]
+        combined_speeds = [r.pg_tps if r.pg_tps else 0 for r in organized_results]
+
+        # Generate timestamp for filenames
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+
+        # Calculate dynamic figure width based on number of results
+        num_results = len(organized_results)
+        bar_width_per_result = 0.8  # inches per bar
+        min_width = 10
+        individual_fig_width = max(min_width, num_results * bar_width_per_result)
+
+        # Helper function to add value labels on bars
+        def add_bar_labels(ax, bars):
+            for bar in bars:
+                height = bar.get_height()
+                if height > 0:
+                    ax.text(
+                        bar.get_x() + bar.get_width() / 2.0,
+                        height,
+                        f"{height:.1f}",
+                        ha="center",
+                        va="bottom",
+                        fontsize=9,
+                    )
+
+        # Helper function to format x-axis labels and add visual grouping
+        def format_xaxis(ax, labels_list, x_positions):
+            ax.set_xticks(x_positions)
+            ax.set_xticklabels(labels_list, rotation=90, ha="center", fontsize=9)
+            ax.grid(axis="y", alpha=0.3)
+            ax.margins(x=0.01)
+
+            # Add visual separation between model groups
+            prev_model = None
+            for i, result in enumerate(organized_results):
+                if prev_model and result.model != prev_model:
+                    # Draw vertical line between model groups
+                    ax.axvline(
+                        x=i - 0.5, color="gray", linestyle="--", linewidth=1, alpha=0.5
+                    )
+                prev_model = result.model
+
+        # --- Individual Graph 1: Prompt Processing Speed ---
+        fig1, ax1 = plt.subplots(figsize=(individual_fig_width, 8))
+        bars1 = ax1.bar(range(len(labels)), prompt_speeds, color="steelblue", alpha=0.7)
+        ax1.set_title("Prompt Processing Speed", fontsize=14, fontweight="bold", pad=20)
+        ax1.set_ylabel("Tokens/Second", fontsize=12)
+        format_xaxis(ax1, labels, range(len(labels)))
+        add_bar_labels(ax1, bars1)
+        plt.tight_layout()
+        graph_path_1 = self.config.out_dir / f"benchmark_prompt_speed_{timestamp}.png"
+        plt.savefig(graph_path_1, dpi=300, bbox_inches="tight")
+        self.logger.info(f"Saved visualization: {graph_path_1}")
+        plt.close(fig1)
+
+        # --- Individual Graph 2: Generation Speed ---
+        fig2, ax2 = plt.subplots(figsize=(individual_fig_width, 8))
+        bars2 = ax2.bar(range(len(labels)), gen_speeds, color="coral", alpha=0.7)
+        ax2.set_title("Text Generation Speed", fontsize=14, fontweight="bold", pad=20)
+        ax2.set_ylabel("Tokens/Second", fontsize=12)
+        format_xaxis(ax2, labels, range(len(labels)))
+        add_bar_labels(ax2, bars2)
+        plt.tight_layout()
+        graph_path_2 = (
+            self.config.out_dir / f"benchmark_generation_speed_{timestamp}.png"
+        )
+        plt.savefig(graph_path_2, dpi=300, bbox_inches="tight")
+        self.logger.info(f"Saved visualization: {graph_path_2}")
+        plt.close(fig2)
+
+        # --- Individual Graph 3: Combined Speed ---
+        fig3, ax3 = plt.subplots(figsize=(individual_fig_width, 8))
+        bars3 = ax3.bar(
+            range(len(labels)), combined_speeds, color="mediumseagreen", alpha=0.7
+        )
+        ax3.set_title(
+            "Combined (Prompt + Generation) Speed",
+            fontsize=14,
+            fontweight="bold",
+            pad=20,
+        )
+        ax3.set_ylabel("Tokens/Second", fontsize=12)
+        format_xaxis(ax3, labels, range(len(labels)))
+        add_bar_labels(ax3, bars3)
+        plt.tight_layout()
+        graph_path_3 = self.config.out_dir / f"benchmark_combined_speed_{timestamp}.png"
+        plt.savefig(graph_path_3, dpi=300, bbox_inches="tight")
+        self.logger.info(f"Saved visualization: {graph_path_3}")
+        plt.close(fig3)
+
+        # --- Individual Graph 4: All Metrics Comparison (Grouped Bar) ---
+        fig4, ax4 = plt.subplots(figsize=(individual_fig_width, 8))
+        x = range(len(labels))
+        width = 0.25
+        ax4.bar(
+            [i - width for i in x],
+            prompt_speeds,
+            width,
+            label="Prompt",
+            color="steelblue",
+            alpha=0.7,
+        )
+        ax4.bar(x, gen_speeds, width, label="Generation", color="coral", alpha=0.7)
+        ax4.bar(
+            [i + width for i in x],
+            combined_speeds,
+            width,
+            label="Combined",
+            color="mediumseagreen",
+            alpha=0.7,
+        )
+        ax4.set_title("All Metrics Comparison", fontsize=14, fontweight="bold", pad=20)
+        ax4.set_ylabel("Tokens/Second", fontsize=12)
+        format_xaxis(ax4, labels, x)
+        ax4.legend(fontsize=11)
+        plt.tight_layout()
+        graph_path_4 = self.config.out_dir / f"benchmark_all_metrics_{timestamp}.png"
+        plt.savefig(graph_path_4, dpi=300, bbox_inches="tight")
+        self.logger.info(f"Saved visualization: {graph_path_4}")
+        plt.close(fig4)
+
+        # --- Combined 2x2 Grid (Original) ---
+        # Calculate combined figure width
+        combined_fig_width = max(16, num_results * 0.4)
+        fig, axes = plt.subplots(2, 2, figsize=(combined_fig_width, 12))
         fig.suptitle("LLM Benchmark Results Comparison", fontsize=16, fontweight="bold")
 
         # Plot 1: Prompt Processing Speed
@@ -513,43 +747,18 @@ class BenchmarkRunner:
         bars1 = ax1.bar(range(len(labels)), prompt_speeds, color="steelblue", alpha=0.7)
         ax1.set_title("Prompt Processing Speed", fontsize=12, fontweight="bold")
         ax1.set_ylabel("Tokens/Second")
-        ax1.set_xticks(range(len(labels)))
-        ax1.set_xticklabels(labels, rotation=45, ha="right")
-        ax1.grid(axis="y", alpha=0.3)
-        # Add value labels on bars
-        for bar in bars1:
-            height = bar.get_height()
-            if height > 0:
-                ax1.text(
-                    bar.get_x() + bar.get_width() / 2.0,
-                    height,
-                    f"{height:.1f}",
-                    ha="center",
-                    va="bottom",
-                    fontsize=8,
-                )
+        format_xaxis(ax1, labels, range(len(labels)))
+        add_bar_labels(ax1, bars1)
 
         # Plot 2: Generation Speed
         ax2 = axes[0, 1]
         bars2 = ax2.bar(range(len(labels)), gen_speeds, color="coral", alpha=0.7)
         ax2.set_title("Text Generation Speed", fontsize=12, fontweight="bold")
         ax2.set_ylabel("Tokens/Second")
-        ax2.set_xticks(range(len(labels)))
-        ax2.set_xticklabels(labels, rotation=45, ha="right")
-        ax2.grid(axis="y", alpha=0.3)
-        for bar in bars2:
-            height = bar.get_height()
-            if height > 0:
-                ax2.text(
-                    bar.get_x() + bar.get_width() / 2.0,
-                    height,
-                    f"{height:.1f}",
-                    ha="center",
-                    va="bottom",
-                    fontsize=8,
-                )
+        format_xaxis(ax2, labels, range(len(labels)))
+        add_bar_labels(ax2, bars2)
 
-        # Plot 3: Combined (Prompt + Generation)
+        # Plot 3: Combined Speed
         ax3 = axes[1, 0]
         bars3 = ax3.bar(
             range(len(labels)), combined_speeds, color="mediumseagreen", alpha=0.7
@@ -558,22 +767,10 @@ class BenchmarkRunner:
             "Combined (Prompt + Generation) Speed", fontsize=12, fontweight="bold"
         )
         ax3.set_ylabel("Tokens/Second")
-        ax3.set_xticks(range(len(labels)))
-        ax3.set_xticklabels(labels, rotation=45, ha="right")
-        ax3.grid(axis="y", alpha=0.3)
-        for bar in bars3:
-            height = bar.get_height()
-            if height > 0:
-                ax3.text(
-                    bar.get_x() + bar.get_width() / 2.0,
-                    height,
-                    f"{height:.1f}",
-                    ha="center",
-                    va="bottom",
-                    fontsize=8,
-                )
+        format_xaxis(ax3, labels, range(len(labels)))
+        add_bar_labels(ax3, bars3)
 
-        # Plot 4: All metrics comparison
+        # Plot 4: All Metrics Comparison
         ax4 = axes[1, 1]
         x = range(len(labels))
         width = 0.25
@@ -596,17 +793,17 @@ class BenchmarkRunner:
         )
         ax4.set_title("All Metrics Comparison", fontsize=12, fontweight="bold")
         ax4.set_ylabel("Tokens/Second")
-        ax4.set_xticks(x)
-        ax4.set_xticklabels(labels, rotation=45, ha="right")
+        format_xaxis(ax4, labels, x)
         ax4.legend()
-        ax4.grid(axis="y", alpha=0.3)
 
         plt.tight_layout()
 
-        # Save figure
-        graph_path = self.config.out_dir / "benchmark_comparison.png"
-        plt.savefig(graph_path, dpi=300, bbox_inches="tight")
-        self.logger.info(f"Saved visualization: {graph_path}")
+        # Save combined figure
+        graph_path_combined = (
+            self.config.out_dir / f"benchmark_comparison_{timestamp}.png"
+        )
+        plt.savefig(graph_path_combined, dpi=300, bbox_inches="tight")
+        self.logger.info(f"Saved combined visualization: {graph_path_combined}")
         plt.close()
 
     def run(self):
@@ -726,6 +923,11 @@ class BenchmarkRunner:
 
 def main():
     """Entry point"""
+
+    if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
+        print_help()
+        return
+
     config = BenchConfig()
     runner = BenchmarkRunner(config)
 
