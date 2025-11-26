@@ -662,7 +662,8 @@ class BenchmarkRunner:
                             f"{model}\navg={avg_val:.1f}",
                             ha="center",
                             va="bottom",
-                            fontsize=8,
+                            fontsize=18,
+                            fontweight="bold",
                             clip_on=False,
                         )
 
