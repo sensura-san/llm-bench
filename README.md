@@ -65,6 +65,15 @@ Note: use instruct models where possible
 ```
 
 ## Quantisation
+You may batch quantise using the provided `llama-quantize.py` wrapper for llama-quantize from llama.cpp provided in the repository; a `-h` parameter is available for easy reference.
+### Example
+Finds and quantises F16 model using default list. Assumes naming scheme follows [model name]-[quant].gguf format.
+```bash
+cd model-dir
+python llama-quantize.py model-name
+```
+
+### llama-quantize reference from llama-cpp repository
 ```bash
 # from Huggingface, obtain the official meta-llama/Llama-3.1-8B model weights and place them in ./models
 ls ./models
