@@ -893,3 +893,77 @@ Results CSV: results/results.csv
 Error log: results/bench_errors.log
 JSON files: results/*.json
 Graphs: results/benchmark_comparison.png
+Starting LLM benchmark run
+Output directory: results
+Configuration: 4 threads, 512p + 128g tokens, 5 reps
+
+Model directory not found: models/qwen3-0.6b
+Model directory not found: models/qwen2.5-0.5b-instruct
+Model directory not found: models/gemma3-270m-instruct
+Model directory not found: models/gemma3-1b-instruct
+Model directory not found: models/llama3.2-1b
+No results to visualize
+
+Benchmark complete!
+Results CSV: results/results.csv
+Error log: results/bench_errors.log
+JSON files: results/*.json
+Graphs: results/benchmark_comparison.png
+Starting LLM benchmark run
+Output directory: results
+Configuration: 4 threads, 512p + 128g tokens, 5 reps
+
+Model directory not found: models/qwen3-0.6b
+Model directory not found: models/qwen2.5-0.5b-instruct
+Model directory not found: models/gemma3-270m-instruct
+Model directory not found: models/gemma3-1b-instruct
+Model directory not found: models/llama3.2-1b
+No results to visualize
+
+Benchmark complete!
+Results CSV: results/results.csv
+Error log: results/bench_errors.log
+JSON files: results/*.json
+Graphs: results/benchmark_comparison.png
+Starting LLM benchmark run
+Output directory: results
+Configuration: 4 threads, 512p + 128g tokens, 5 reps
+
+Model directory not found: models/qwen3-0.6b
+Model directory not found: models/qwen2.5-0.5b-instruct
+Model directory not found: models/gemma3-270m-instruct
+Model directory not found: models/gemma3-1b-instruct
+Model directory not found: models/llama3.2-1b
+No results to visualize
+
+Benchmark complete!
+Results CSV: results/results.csv
+Error log: results/bench_errors.log
+JSON files: results/*.json
+Graphs: results/benchmark_comparison.png
+Loading results from results/results_extended_21nov.csv
+
+Generating visualization graphs...
+Saved visualization: results/benchmark_prompt_speed_20251126_193458.png
+Saved visualization: results/benchmark_generation_speed_20251126_193458.png
+Saved visualization: results/benchmark_combined_speed_20251126_193458.png
+Saved visualization: results/benchmark_all_metrics_20251126_193458.png
+Saved per-model visualization: results/benchmark_gemma3-270m-instruct_20251126_193458.png
+Saved per-model visualization: results/benchmark_qwen2.5-0.5b-instruct_20251126_193458.png
+Saved per-model visualization: results/benchmark_qwen3-0.6b_20251126_193458.png
+Saved per-model visualization: results/benchmark_gemma3-1b-instruct_20251126_193458.png
+Saved per-model visualization: results/benchmark_llama3.2-1b_20251126_193458.png
+Saved combined overview: results/benchmark_comparison_20251126_193458.png
+Loading results from results/results_extended_21nov.csv
+
+Generating visualization graphs...
+Saved visualization: results/benchmark_prompt_speed_20251126_203520.png
+Saved visualization: results/benchmark_generation_speed_20251126_203520.png
+Saved visualization: results/benchmark_combined_speed_20251126_203520.png
+Saved visualization: results/benchmark_all_metrics_20251126_203520.png
+Saved per-model visualization: results/benchmark_gemma3-270m-instruct_20251126_203520.png
+Saved per-model visualization: results/benchmark_qwen2.5-0.5b-instruct_20251126_203520.png
+Saved per-model visualization: results/benchmark_qwen3-0.6b_20251126_203520.png
+Saved per-model visualization: results/benchmark_gemma3-1b-instruct_20251126_203520.png
+Saved per-model visualization: results/benchmark_llama3.2-1b_20251126_203520.png
+Saved combined overview: results/benchmark_comparison_20251126_203520.png

@@ -575,61 +575,39 @@ class BenchmarkRunner:
             self.logger.warning("No valid results for graphing")
             return
 
+        # Group and organize results
         model_groups = defaultdict(list)
         for result in valid_results:
             model_groups[result.model].append(result)
 
+        # Calculate model averages
         model_averages = {}
         for model, results in model_groups.items():
             avg_speeds = [r.pg_tps for r in results if r.pg_tps]
-            if avg_speeds:
-                model_averages[model] = sum(avg_speeds) / len(avg_speeds)
-            else:
-                fallback = []
-                for r in results:
-                    if r.gen_tps:
-                        fallback.append(r.gen_tps)
-                    elif r.prompt_tps:
-                        fallback.append(r.prompt_tps)
-                model_averages[model] = sum(fallback) / len(fallback) if fallback else 0
+            if not avg_speeds:
+                avg_speeds = [r.gen_tps or r.prompt_tps or 0 for r in results]
+            model_averages[model] = (
+                sum(avg_speeds) / len(avg_speeds) if avg_speeds else 0
+            )
 
         sorted_models = sorted(
             model_averages.keys(), key=lambda m: model_averages[m], reverse=True
         )
 
+        # Organize results by sorted models
         organized_results = []
         for model in sorted_models:
             organized_results.extend(model_groups[model])
 
-        labels = [f"{r.model}\n{r.quant}" for r in organized_results]
-        prompt_speeds = [r.prompt_tps if r.prompt_tps else 0 for r in organized_results]
-        gen_speeds = [r.gen_tps if r.gen_tps else 0 for r in organized_results]
-        combined_speeds = [r.pg_tps if r.pg_tps else 0 for r in organized_results]
+        # Setup colors
+        cmap = plt.get_cmap("tab20")
+        model_colors = {
+            model: cmap(i % cmap.N) for i, model in enumerate(sorted_models)
+        }
 
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 
-        num_results = len(organized_results)
-        bar_width_per_result = 0.8
-        min_width = 10
-        individual_fig_width = max(min_width, num_results * bar_width_per_result)
-
-        model_x_indices = defaultdict(list)
-        for idx, r in enumerate(organized_results):
-            model_x_indices[r.model].append(idx)
-
-        model_group_centers = []
-        for model in sorted_models:
-            indices = model_x_indices[model]
-            center = (min(indices) + max(indices)) / 2.0
-            model_group_centers.append((model, center, model_averages.get(model, 0.0)))
-
-        cmap = plt.get_cmap("tab20")
-        model_colors = {}
-        for i, model in enumerate(sorted_models):
-            model_colors[model] = cmap(i % cmap.N)
-
-        bar_colors_by_model = [model_colors[r.model] for r in organized_results]
-
+        # Helper functions
         def add_bar_labels(ax, bars):
             for bar in bars:
                 height = bar.get_height()
@@ -643,210 +621,303 @@ class BenchmarkRunner:
                         fontsize=9,
                     )
 
-        def format_xaxis(ax, labels_list, x_positions):
+        def format_xaxis(ax, labels_list, x_positions, show_model_groups=True):
             ax.set_xticks(list(x_positions))
             ax.set_xticklabels(labels_list, rotation=90, ha="center", fontsize=9)
             ax.grid(axis="y", alpha=0.3)
             ax.margins(x=0.01)
 
-            prev_model = None
-            for i, result in enumerate(organized_results):
-                if prev_model and result.model != prev_model:
-                    ax.axvline(
-                        x=i - 0.5, color="gray", linestyle="--", linewidth=1, alpha=0.5
-                    )
-                prev_model = result.model
+            if show_model_groups:
+                # Add dividers between models
+                prev_model = None
+                for i, result in enumerate(organized_results):
+                    if prev_model and result.model != prev_model:
+                        ax.axvline(
+                            x=i - 0.5,
+                            color="gray",
+                            linestyle="--",
+                            linewidth=1,
+                            alpha=0.5,
+                        )
+                    prev_model = result.model
 
-            ylim = ax.get_ylim()
-            y_min, y_max = ylim
-            span = y_max - y_min
-            text_y = y_max + span * 0.05
+                # Add model group labels
+                model_x_indices = defaultdict(list)
+                for idx, r in enumerate(organized_results):
+                    model_x_indices[r.model].append(idx)
 
-            for model_name, center_x, avg_val in model_group_centers:
-                if avg_val > 0:
-                    ax.text(
-                        center_x,
-                        text_y,
-                        f"{model_name}\navg={avg_val:.1f}",
-                        ha="center",
-                        va="bottom",
-                        fontsize=8,
-                        clip_on=False,
-                    )
+                ylim = ax.get_ylim()
+                y_min, y_max = ylim
+                span = y_max - y_min
+                text_y = y_max + span * 0.05
 
-            ax.set_ylim(y_min, y_max + span * 0.12)
+                for model in sorted_models:
+                    indices = model_x_indices[model]
+                    center = (min(indices) + max(indices)) / 2.0
+                    avg_val = model_averages.get(model, 0.0)
+                    if avg_val > 0:
+                        ax.text(
+                            center,
+                            text_y,
+                            f"{model}\navg={avg_val:.1f}",
+                            ha="center",
+                            va="bottom",
+                            fontsize=8,
+                            clip_on=False,
+                        )
 
-        fig1, ax1 = plt.subplots(figsize=(individual_fig_width, 8))
-        bars1 = ax1.bar(
-            range(len(labels)), prompt_speeds, color=bar_colors_by_model, alpha=0.7
+                ax.set_ylim(y_min, y_max + span * 0.12)
+
+        def create_bar_chart(title, data, colors, filename, width=None):
+            """Helper to create individual bar charts"""
+            num_results = len(data)
+            fig_width = width or max(10, num_results * 0.8)
+
+            fig, ax = plt.subplots(figsize=(fig_width, 8))
+            bars = ax.bar(range(len(data)), data, color=colors, alpha=0.7)
+            ax.set_title(title, fontsize=14, fontweight="bold", pad=20)
+            ax.set_ylabel("Tokens/Second", fontsize=12)
+            format_xaxis(ax, labels, range(len(data)))
+            add_bar_labels(ax, bars)
+            plt.tight_layout()
+
+            path = self.config.out_dir / filename
+            plt.savefig(path, dpi=300, bbox_inches="tight")
+            self.logger.info(f"Saved visualization: {path}")
+            plt.close(fig)
+
+        # Prepare data
+        labels = [r.quant for r in organized_results]  # Only show quantization
+        bar_colors = [model_colors[r.model] for r in organized_results]
+        prompt_speeds = [r.prompt_tps or 0 for r in organized_results]
+        gen_speeds = [r.gen_tps or 0 for r in organized_results]
+        combined_speeds = [r.pg_tps or 0 for r in organized_results]
+
+        # Generate overall comparison charts
+        create_bar_chart(
+            "Prompt Processing Speed",
+            prompt_speeds,
+            bar_colors,
+            f"benchmark_prompt_speed_{timestamp}.png",
         )
-        ax1.set_title("Prompt Processing Speed", fontsize=14, fontweight="bold", pad=20)
-        ax1.set_ylabel("Tokens/Second", fontsize=12)
-        format_xaxis(ax1, labels, range(len(labels)))
-        add_bar_labels(ax1, bars1)
-        plt.tight_layout()
-        graph_path_1 = self.config.out_dir / f"benchmark_prompt_speed_{timestamp}.png"
-        plt.savefig(graph_path_1, dpi=300, bbox_inches="tight")
-        self.logger.info(f"Saved visualization: {graph_path_1}")
-        plt.close(fig1)
-
-        fig2, ax2 = plt.subplots(figsize=(individual_fig_width, 8))
-        bars2 = ax2.bar(
-            range(len(labels)), gen_speeds, color=bar_colors_by_model, alpha=0.7
+        create_bar_chart(
+            "Text Generation Speed",
+            gen_speeds,
+            bar_colors,
+            f"benchmark_generation_speed_{timestamp}.png",
         )
-        ax2.set_title("Text Generation Speed", fontsize=14, fontweight="bold", pad=20)
-        ax2.set_ylabel("Tokens/Second", fontsize=12)
-        format_xaxis(ax2, labels, range(len(labels)))
-        add_bar_labels(ax2, bars2)
-        plt.tight_layout()
-        graph_path_2 = (
-            self.config.out_dir / f"benchmark_generation_speed_{timestamp}.png"
-        )
-        plt.savefig(graph_path_2, dpi=300, bbox_inches="tight")
-        self.logger.info(f"Saved visualization: {graph_path_2}")
-        plt.close(fig2)
-
-        fig3, ax3 = plt.subplots(figsize=(individual_fig_width, 8))
-        bars3 = ax3.bar(
-            range(len(labels)), combined_speeds, color=bar_colors_by_model, alpha=0.7
-        )
-        ax3.set_title(
+        create_bar_chart(
             "Combined (Prompt + Generation) Speed",
-            fontsize=14,
-            fontweight="bold",
-            pad=20,
+            combined_speeds,
+            bar_colors,
+            f"benchmark_combined_speed_{timestamp}.png",
         )
-        ax3.set_ylabel("Tokens/Second", fontsize=12)
-        format_xaxis(ax3, labels, range(len(labels)))
-        add_bar_labels(ax3, bars3)
-        plt.tight_layout()
-        graph_path_3 = self.config.out_dir / f"benchmark_combined_speed_{timestamp}.png"
-        plt.savefig(graph_path_3, dpi=300, bbox_inches="tight")
-        self.logger.info(f"Saved visualization: {graph_path_3}")
-        plt.close(fig3)
 
-        fig4, ax4 = plt.subplots(figsize=(individual_fig_width, 8))
+        # All metrics comparison (grouped bars)
+        num_results = len(organized_results)
+        fig_width = max(10, num_results * 0.8)
+        fig, ax = plt.subplots(figsize=(fig_width, 8))
         x = list(range(len(labels)))
         width = 0.25
-        colors_prompt = [model_colors[r.model] for r in organized_results]
-        colors_gen = [model_colors[r.model] for r in organized_results]
-        colors_comb = [model_colors[r.model] for r in organized_results]
 
-        ax4.bar(
+        # Create different shades for each metric
+        import matplotlib.colors as mcolors
+
+        colors_prompt = [
+            mcolors.to_rgba(model_colors[r.model], alpha=0.5) for r in organized_results
+        ]
+        colors_gen = [
+            mcolors.to_rgba(model_colors[r.model], alpha=0.7) for r in organized_results
+        ]
+        colors_combined = [
+            mcolors.to_rgba(model_colors[r.model], alpha=0.9) for r in organized_results
+        ]
+
+        ax.bar(
             [i - width for i in x],
             prompt_speeds,
             width,
             label="Prompt",
             color=colors_prompt,
-            alpha=0.7,
         )
-        ax4.bar(
-            x,
-            gen_speeds,
-            width,
-            label="Generation",
-            color=colors_gen,
-            alpha=0.7,
-        )
-        ax4.bar(
+        ax.bar(x, gen_speeds, width, label="Generation", color=colors_gen)
+        ax.bar(
             [i + width for i in x],
             combined_speeds,
             width,
             label="Combined",
-            color=colors_comb,
-            alpha=0.7,
+            color=colors_combined,
         )
-        ax4.set_title("All Metrics Comparison", fontsize=14, fontweight="bold", pad=20)
-        ax4.set_ylabel("Tokens/Second", fontsize=12)
-        format_xaxis(ax4, labels, x)
-        ax4.legend(fontsize=11)
-        plt.tight_layout()
-        graph_path_4 = self.config.out_dir / f"benchmark_all_metrics_{timestamp}.png"
-        plt.savefig(graph_path_4, dpi=300, bbox_inches="tight")
-        self.logger.info(f"Saved visualization: {graph_path_4}")
-        plt.close(fig4)
 
+        ax.set_title("All Metrics Comparison", fontsize=14, fontweight="bold", pad=20)
+        ax.set_ylabel("Tokens/Second", fontsize=12)
+        format_xaxis(ax, labels, x)
+        ax.legend(fontsize=11)
+        plt.tight_layout()
+
+        path = self.config.out_dir / f"benchmark_all_metrics_{timestamp}.png"
+        plt.savefig(path, dpi=300, bbox_inches="tight")
+        self.logger.info(f"Saved visualization: {path}")
+        plt.close(fig)
+
+        # Generate per-model graphs
+        for model in sorted_models:
+            model_results = model_groups[model]
+            if not model_results:
+                continue
+
+            model_labels = [r.quant for r in model_results]
+            model_prompt = [r.prompt_tps or 0 for r in model_results]
+            model_gen = [r.gen_tps or 0 for r in model_results]
+            model_combined = [r.pg_tps or 0 for r in model_results]
+
+            # Create 2x2 grid for each model
+            fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+            fig.suptitle(
+                f"{model} - Performance Comparison", fontsize=14, fontweight="bold"
+            )
+            color = model_colors[model]
+
+            # Prompt speed
+            bars = axes[0, 0].bar(
+                range(len(model_labels)), model_prompt, color=color, alpha=0.7
+            )
+            axes[0, 0].set_title("Prompt Speed", fontsize=11, fontweight="bold")
+            axes[0, 0].set_ylabel("Tokens/Second")
+            format_xaxis(
+                axes[0, 0],
+                model_labels,
+                range(len(model_labels)),
+                show_model_groups=False,
+            )
+            add_bar_labels(axes[0, 0], bars)
+
+            # Generation speed
+            bars = axes[0, 1].bar(
+                range(len(model_labels)), model_gen, color=color, alpha=0.7
+            )
+            axes[0, 1].set_title("Generation Speed", fontsize=11, fontweight="bold")
+            axes[0, 1].set_ylabel("Tokens/Second")
+            format_xaxis(
+                axes[0, 1],
+                model_labels,
+                range(len(model_labels)),
+                show_model_groups=False,
+            )
+            add_bar_labels(axes[0, 1], bars)
+
+            # Combined speed
+            bars = axes[1, 0].bar(
+                range(len(model_labels)), model_combined, color=color, alpha=0.7
+            )
+            axes[1, 0].set_title("Combined Speed", fontsize=11, fontweight="bold")
+            axes[1, 0].set_ylabel("Tokens/Second")
+            format_xaxis(
+                axes[1, 0],
+                model_labels,
+                range(len(model_labels)),
+                show_model_groups=False,
+            )
+            add_bar_labels(axes[1, 0], bars)
+
+            # All metrics grouped
+            x_pos = list(range(len(model_labels)))
+            w = 0.25
+            import matplotlib.colors as mcolors
+
+            color_light = mcolors.to_rgba(color, alpha=0.5)
+            color_medium = mcolors.to_rgba(color, alpha=0.7)
+            color_dark = mcolors.to_rgba(color, alpha=0.9)
+
+            axes[1, 1].bar(
+                [i - w for i in x_pos],
+                model_prompt,
+                w,
+                label="Prompt",
+                color=color_light,
+            )
+            axes[1, 1].bar(x_pos, model_gen, w, label="Generation", color=color_medium)
+            axes[1, 1].bar(
+                [i + w for i in x_pos],
+                model_combined,
+                w,
+                label="Combined",
+                color=color_dark,
+            )
+            axes[1, 1].set_title("All Metrics", fontsize=11, fontweight="bold")
+            axes[1, 1].set_ylabel("Tokens/Second")
+            format_xaxis(axes[1, 1], model_labels, x_pos, show_model_groups=False)
+            axes[1, 1].legend(fontsize=9)
+
+            plt.tight_layout()
+            model_safe = model.replace("/", "_").replace(" ", "_")
+            path = self.config.out_dir / f"benchmark_{model_safe}_{timestamp}.png"
+            plt.savefig(path, dpi=300, bbox_inches="tight")
+            self.logger.info(f"Saved per-model visualization: {path}")
+            plt.close(fig)
+
+        # Combined overview (2x2 grid)
         combined_fig_width = max(16, num_results * 0.4)
         fig, axes = plt.subplots(2, 2, figsize=(combined_fig_width, 12))
-        fig.suptitle("LLM Benchmark Results Comparison", fontsize=16, fontweight="bold")
-
-        ax1 = axes[0, 0]
-        bars1 = ax1.bar(
-            range(len(labels)), prompt_speeds, color=bar_colors_by_model, alpha=0.7
+        fig.suptitle(
+            "LLM Benchmark Results - Overall Comparison", fontsize=16, fontweight="bold"
         )
-        ax1.set_title("Prompt Processing Speed", fontsize=12, fontweight="bold")
-        ax1.set_ylabel("Tokens/Second")
-        format_xaxis(ax1, labels, range(len(labels)))
-        add_bar_labels(ax1, bars1)
 
-        ax2 = axes[0, 1]
-        bars2 = ax2.bar(
-            range(len(labels)), gen_speeds, color=bar_colors_by_model, alpha=0.7
-        )
-        ax2.set_title("Text Generation Speed", fontsize=12, fontweight="bold")
-        ax2.set_ylabel("Tokens/Second")
-        format_xaxis(ax2, labels, range(len(labels)))
-        add_bar_labels(ax2, bars2)
+        # Reuse plotting logic for grid
+        for idx, (ax, data, title) in enumerate(
+            [
+                (axes[0, 0], prompt_speeds, "Prompt Processing Speed"),
+                (axes[0, 1], gen_speeds, "Text Generation Speed"),
+                (axes[1, 0], combined_speeds, "Combined Speed"),
+            ]
+        ):
+            bars = ax.bar(range(len(labels)), data, color=bar_colors, alpha=0.7)
+            ax.set_title(title, fontsize=12, fontweight="bold")
+            ax.set_ylabel("Tokens/Second")
+            format_xaxis(ax, labels, range(len(labels)))
+            add_bar_labels(ax, bars)
 
-        ax3 = axes[1, 0]
-        bars3 = ax3.bar(
-            range(len(labels)), combined_speeds, color=bar_colors_by_model, alpha=0.7
-        )
-        ax3.set_title(
-            "Combined (Prompt + Generation) Speed", fontsize=12, fontweight="bold"
-        )
-        ax3.set_ylabel("Tokens/Second")
-        format_xaxis(ax3, labels, range(len(labels)))
-        add_bar_labels(ax3, bars3)
-
+        # All metrics in bottom right
         ax4 = axes[1, 1]
         ax4.bar(
             [i - width for i in x],
             prompt_speeds,
             width,
             label="Prompt",
-            color=colors_prompt,
+            color=bar_colors,
             alpha=0.7,
         )
-        ax4.bar(
-            x,
-            gen_speeds,
-            width,
-            label="Generation",
-            color=colors_gen,
-            alpha=0.7,
-        )
+        ax4.bar(x, gen_speeds, width, label="Generation", color=bar_colors, alpha=0.7)
         ax4.bar(
             [i + width for i in x],
             combined_speeds,
             width,
             label="Combined",
-            color=colors_comb,
+            color=bar_colors,
             alpha=0.7,
         )
         ax4.set_title("All Metrics Comparison", fontsize=12, fontweight="bold")
         ax4.set_ylabel("Tokens/Second")
         format_xaxis(ax4, labels, x)
-        handles = []
-        for model in sorted_models:
-            handles.append(
-                plt.Line2D(
-                    [0],
-                    [0],
-                    marker="s",
-                    linestyle="",
-                    label=model,
-                    color=model_colors[model],
-                )
+
+        # Legend with model colors
+        handles = [
+            plt.Line2D(
+                [0],
+                [0],
+                marker="s",
+                linestyle="",
+                label=model,
+                color=model_colors[model],
             )
+            for model in sorted_models
+        ]
         ax4.legend(handles=handles, title="Models", fontsize=8, title_fontsize=9)
 
         plt.tight_layout()
-        graph_path_combined = (
-            self.config.out_dir / f"benchmark_comparison_{timestamp}.png"
-        )
-        plt.savefig(graph_path_combined, dpi=300, bbox_inches="tight")
-        self.logger.info(f"Saved combined visualization: {graph_path_combined}")
+        path = self.config.out_dir / f"benchmark_comparison_{timestamp}.png"
+        plt.savefig(path, dpi=300, bbox_inches="tight")
+        self.logger.info(f"Saved combined overview: {path}")
         plt.close()
 
     def run(self):
