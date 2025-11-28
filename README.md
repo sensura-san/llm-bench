@@ -2,6 +2,8 @@
 A general bash script for easily benchmarking multiple models based on prompt processing and generation speed. Built atop llama-bench. 
 ## Project focus 
 Benchmarking different quantisations of LLMs for edge device computing (specifically, the Raspberry Pi 4b) for prompt processing / token generation speed.
+## Results
+Raw results are inside the `results/` folder. 
 # Raspberry Pi Setup
 ## Update and install packages
 ```bash
